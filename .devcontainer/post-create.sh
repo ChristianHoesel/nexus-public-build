@@ -4,21 +4,26 @@ set -e
 echo "🚀 Nexus Public Build Environment Setup"
 echo "========================================"
 
-# Installiere Yarn 1.22.22 (falls nicht vorhanden)
-if ! command -v yarn &> /dev/null || [ "$(yarn --version)" != "1.22.22" ]; then
-    echo "📦 Installiere Yarn 1.22.22..."
-    npm install -g yarn@1.22.22
-else
-    echo "✅ Yarn 1.22.22 bereits installiert"
+# Aktiviere Corepack für Yarn 4.x Unterstützung
+echo "📦 Aktiviere Corepack für Yarn 4.x..."
+corepack enable
+
+# JAVA_HOME setzen
+if [ -z "$JAVA_HOME" ]; then
+    export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+    echo "export JAVA_HOME=$JAVA_HOME" >> ~/.bashrc
+    echo "export MAVEN_OPTS=\"-Xmx4g -XX:+UseG1GC\"" >> ~/.bashrc
+    echo "✅ JAVA_HOME in ~/.bashrc gesetzt"
 fi
 
 # Verifiziere Installationen
 echo ""
 echo "✅ Installierte Versionen:"
 echo "   Java: $(java -version 2>&1 | head -n 1)"
+echo "   JAVA_HOME: $JAVA_HOME"
 echo "   Node: $(node -v)"
 echo "   NPM: $(npm -v)"
-echo "   Yarn: $(yarn --version)"
+echo "   Corepack: $(corepack --version)"
 echo "   Maven: $(mvn -v | head -n 1)"
 echo "   Git: $(git --version)"
 

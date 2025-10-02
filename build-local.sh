@@ -23,6 +23,12 @@ check_requirements() {
         exit 1
     fi
     
+    # JAVA_HOME setzen falls nicht gesetzt
+    if [ -z "$JAVA_HOME" ]; then
+        export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+        echo "✅ JAVA_HOME gesetzt: $JAVA_HOME"
+    fi
+    
     JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d'.' -f1)
     if [ "$JAVA_VERSION" != "17" ]; then
         echo "⚠️  Warnung: Java $JAVA_VERSION gefunden, aber Java 17 wird empfohlen."
@@ -42,13 +48,15 @@ check_requirements() {
     fi
     echo "✅ Node.js $(node -v) gefunden"
     
-    # Yarn prüfen/installieren
-    if ! command -v yarn &> /dev/null; then
-        echo "⚠️  Yarn nicht gefunden. Installiere Yarn 1.22..."
-        npm install -g yarn@1.22.22
+    # Corepack aktivieren (für Yarn 4.x)
+    if ! command -v corepack &> /dev/null; then
+        echo "⚠️  Corepack nicht gefunden."
+    else
+        echo "✅ Aktiviere Corepack für Yarn 4.x..."
+        corepack enable 2>/dev/null || true
     fi
     
-    YARN_VERSION=$(yarn --version)
+    YARN_VERSION=$(yarn --version 2>/dev/null || echo "nicht installiert")
     echo "✅ Yarn $YARN_VERSION gefunden"
     
     echo ""
@@ -75,8 +83,16 @@ install_dependencies() {
     echo "📦 Installiere Dependencies..."
     cd "$NEXUS_DIR"
     
+    # Corepack für Yarn 4.x aktivieren
+    corepack enable 2>/dev/null || true
+    
+    # Yarn 4.x über Corepack bereitstellen
+    if [ -f "package.json" ] && grep -q '"packageManager"' package.json; then
+        echo "ℹ️  Projekt verwendet packageManager field - Corepack wird Yarn 4.x verwenden"
+    fi
+    
     # Yarn installieren
-    yarn install --frozen-lockfile 2>/dev/null || yarn install
+    yarn install 2>&1 | grep -v "YN0060\|YN0002\|YN0086" || true
     
     echo ""
 }
@@ -85,6 +101,11 @@ install_dependencies() {
 build_nexus() {
     echo "🔨 Starte Build..."
     cd "$NEXUS_DIR"
+    
+    # JAVA_HOME sicherstellen
+    if [ -z "$JAVA_HOME" ]; then
+        export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+    fi
     
     # Maven Optionen für Performance
     export MAVEN_OPTS="-Xmx4g -XX:+UseG1GC"

@@ -38,7 +38,7 @@
             "default": true
           }
         ],
-        "java.home": "/usr/local/sdkman/candidates/java/current",
+        "java.jdt.ls.java.home": "/usr/local/sdkman/candidates/java/current",
         "maven.executable.path": "mvn",
         "terminal.integrated.defaultProfile.linux": "bash"
       }
@@ -46,8 +46,9 @@
   },
 
   "remoteEnv": {
-    "JAVA_HOME": "/usr/local/sdkman/candidates/java/current",
-    "MAVEN_OPTS": "-Xmx4g -XX:+UseG1GC"
+    "JAVA_HOME": "/usr/lib/jvm/msopenjdk-current",
+    "MAVEN_OPTS": "-Xmx4g -XX:+UseG1GC",
+    "PATH": "${containerEnv:PATH}"
   },
 
   "forwardPorts": [8081],

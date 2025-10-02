@@ -88,6 +88,29 @@ Automatisch installierte Extensions:
 
 ## Troubleshooting
 
+### Yarn Version Fehler
+
+Falls Sie einen Fehler wie "packageManager: yarn@4.9.1" sehen:
+
+```bash
+corepack enable
+cd nexus-public
+yarn install
+```
+
+Das Build-Script aktiviert Corepack jetzt automatisch.
+
+### JAVA_HOME nicht gesetzt
+
+Falls Maven sich über JAVA_HOME beschwert:
+
+```bash
+export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
+./build-local.sh
+```
+
+Das Build-Script setzt JAVA_HOME jetzt automatisch.
+
 ### Out of Memory beim Build
 
 Die Umgebungsvariable `MAVEN_OPTS` ist bereits auf 4GB gesetzt. Falls Sie mehr benötigen:
