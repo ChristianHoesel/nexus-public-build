@@ -1,0 +1,28 @@
+# Nexus Build Verzeichnis
+nexus-public/
+
+# Build Artefakte
+*.tar.gz
+*.zip
+artifacts/
+
+# Node
+node_modules/
+.yarn/
+.pnp.*
+
+# Maven
+target/
+.mvn/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/
+
+# OS
+.DS_Store
+Thumbs.db

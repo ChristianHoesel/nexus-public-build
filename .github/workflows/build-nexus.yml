@@ -1,0 +1,145 @@
+name: Build Nexus OSS
+
+on:
+  workflow_dispatch:
+    inputs:
+      nexus_version:
+        description: 'Nexus version/branch to build (e.g., release-3.84.1-01)'
+        required: true
+        default: 'release-3.84.1-01'
+  push:
+    branches:
+      - main
+  schedule:
+    # Wöchentlicher Build jeden Montag um 2 Uhr UTC
+    - cron: '0 2 * * 1'
+
+env:
+  JAVA_VERSION: '17'
+  YARN_LEGACY_VERSION: '1.22.22'
+  YARN_MODERN_VERSION: '4.5.3'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+      
+      - name: Checkout Nexus Public
+        uses: actions/checkout@v4
+        with:
+          repository: sonatype/nexus-public
+          ref: ${{ github.event.inputs.nexus_version || 'release-3.84.1-01' }}
+          path: nexus-public
+          fetch-depth: 1
+      
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Install Yarn 1.22
+        run: |
+          npm install -g yarn@${YARN_LEGACY_VERSION}
+          echo "Installed Yarn version:"
+          yarn --version
+      
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            nexus-public/.yarn/cache
+            nexus-public/.yarn/unplugged
+            nexus-public/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('nexus-public/**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      
+      - name: Install dependencies
+        working-directory: nexus-public
+        run: |
+          # Yarn 1.x für initiale Installation
+          yarn install --frozen-lockfile || yarn install
+      
+      - name: Setup Yarn 4 (falls benötigt)
+        working-directory: nexus-public
+        run: |
+          # Prüfen ob Yarn 4 benötigt wird
+          if [ -f ".yarnrc.yml" ]; then
+            echo "Yarn 4 configuration detected"
+            yarn set version ${YARN_MODERN_VERSION}
+            yarn --version
+          fi
+      
+      - name: Build Nexus
+        working-directory: nexus-public
+        run: |
+          # Maven Build mit "public" Profil (erforderlich für OSS Build)
+          ./mvnw clean install -Ppublic -DskipTests -Dmaven.javadoc.skip=true
+        env:
+          MAVEN_OPTS: "-Xmx4g -XX:+UseG1GC"
+      
+      - name: Run tests (optional)
+        if: github.event_name == 'workflow_dispatch'
+        working-directory: nexus-public
+        run: |
+          ./mvnw verify -Ppublic
+        continue-on-error: true
+      
+      - name: Find built artifacts
+        id: artifacts
+        run: |
+          echo "Finding Nexus artifacts..."
+          find nexus-public -name "nexus-*.tar.gz" -o -name "nexus-*.zip" | tee artifacts.txt
+          
+      - name: Upload Nexus artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nexus-oss-build-${{ github.event.inputs.nexus_version || 'latest' }}
+          path: |
+            nexus-public/**/target/nexus-*.tar.gz
+            nexus-public/**/target/nexus-*.zip
+          retention-days: 30
+          if-no-files-found: warn
+      
+      - name: Create Release (on tag)
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            nexus-public/**/target/nexus-*.tar.gz
+            nexus-public/**/target/nexus-*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-docker:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+      
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nexus-oss-build-${{ github.event.inputs.nexus_version || 'latest' }}
+          path: ./artifacts
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Build Docker image (optional)
+        run: |
+          echo "Docker image build kann hier implementiert werden"
+          # docker build -t nexus-oss:custom .
