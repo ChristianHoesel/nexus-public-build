@@ -80,6 +80,20 @@ yarn install
 - **Maven**: Wird über Maven Wrapper bereitgestellt
 - **RAM**: Mindestens 4 GB für den Build-Prozess
 
+### Dev Container (Empfohlen)
+
+Dieses Repository enthält einen vollständig konfigurierten Dev Container:
+
+```bash
+# In VS Code:
+# 1. Install "Dev Containers" Extension
+# 2. Cmd/Ctrl+Shift+P → "Dev Containers: Reopen in Container"
+# 3. Warten bis Setup abgeschlossen ist
+# 4. ./build-local.sh ausführen
+```
+
+Der Dev Container enthält alle notwendigen Tools und Konfigurationen.
+
 ## Automatische Builds
 
 Der Workflow führt automatisch folgende Builds durch:

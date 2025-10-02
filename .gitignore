@@ -17,12 +17,21 @@ target/
 
 # IDE
 .idea/
-.vscode/
 *.iml
 .project
 .classpath
 .settings/
 
+# VS Code - nur bestimmte Dateien ignorieren
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
 # OS
 .DS_Store
 Thumbs.db
+
+# Dev Container nicht ignorieren
+!.devcontainer/
