@@ -64,27 +64,30 @@ check_requirements() {
 
 # Nexus Repository klonen oder aktualisieren
 clone_or_update() {
-    if [ -d "$NEXUS_DIR" ]; then
+    if [ -d "$NEXUS_DIR" ] && [ -d "$NEXUS_DIR/.git" ]; then
         echo "📁 Nexus Repository existiert bereits, aktualisiere..."
         cd "$NEXUS_DIR"
         git fetch origin
         git checkout "$VERSION"
         git pull origin "$VERSION" || true
         cd ..
+    elif [ -d "$NEXUS_DIR" ] && [ ! -d "$NEXUS_DIR/.git" ]; then
+        echo "📁 Nexus Repository existiert bereits (ohne .git)..."
+        echo "ℹ️  Überspringe Git-Operationen"
     else
         echo "📥 Clone Nexus Repository..."
         git clone --depth 1 --branch "$VERSION" https://github.com/sonatype/nexus-public.git "$NEXUS_DIR"
-    fi
-    
-    # .gitignore und .git im nexus-public Verzeichnis löschen
-    if [ -f "$NEXUS_DIR/.gitignore" ]; then
-        echo "🗑️  Entferne nexus-public/.gitignore..."
-        rm "$NEXUS_DIR/.gitignore"
-    fi
-    
-    if [ -d "$NEXUS_DIR/.git" ]; then
-        echo "🗑️  Entferne nexus-public/.git Verzeichnis..."
-        rm -rf "$NEXUS_DIR/.git"
+        
+        # .gitignore und .git im nexus-public Verzeichnis löschen
+        if [ -f "$NEXUS_DIR/.gitignore" ]; then
+            echo "🗑️  Entferne nexus-public/.gitignore..."
+            rm "$NEXUS_DIR/.gitignore"
+        fi
+        
+        if [ -d "$NEXUS_DIR/.git" ]; then
+            echo "🗑️  Entferne nexus-public/.git Verzeichnis..."
+            rm -rf "$NEXUS_DIR/.git"
+        fi
     fi
     
     echo ""
@@ -105,6 +108,12 @@ install_dependencies() {
     
     # Yarn installieren
     yarn install 2>&1 | grep -v "YN0060\|YN0002\|YN0086" || true
+    
+    # UI-Komponenten vorab bauen (für workspace:-Referenzen)
+    echo "🔨 Baue UI-Komponenten vor Maven-Build..."
+    cd components/nexus-ui-plugin
+    yarn build 2>&1 | grep -v "YN0000" || true
+    cd ../..
     
     echo ""
     cd ..
@@ -127,7 +136,7 @@ build_nexus() {
     echo "Build-Optionen:"
     echo "1) Schneller Build ohne Tests (empfohlen)"
     echo "2) Vollständiger Build mit Tests"
-    read -p "Auswahl (1/2): " -n 1 -r
+    read -p "Auswahl (1/2): " REPLY
     echo
     
     if [[ $REPLY =~ ^[2]$ ]]; then

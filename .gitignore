@@ -35,3 +35,5 @@ Thumbs.db
 
 # Dev Container nicht ignorieren
 !.devcontainer/
+
+*.log
