@@ -16,6 +16,8 @@ echo ""
 # Prüfe Voraussetzungen
 check_requirements() {
     echo "Prüfe Build-Voraussetzungen..."
+
+    rm -rf nexus-public/
     
     # Java Version prüfen
     if ! command -v java &> /dev/null; then
@@ -95,33 +97,48 @@ clone_or_update() {
 
 # Dependencies installieren
 install_dependencies() {
-    echo "📦 Installiere Dependencies..."
+    echo "📦 Installiere Dependencies im Workspace-Root..."
     cd "$NEXUS_DIR"
     
     # Corepack für Yarn 4.x aktivieren
     corepack enable 2>/dev/null || true
     
-    # Yarn 4.x über Corepack bereitstellen
-    if [ -f "package.json" ] && grep -q '"packageManager"' package.json; then
-        echo "ℹ️  Projekt verwendet packageManager field - Corepack wird Yarn 4.x verwenden"
-    fi
-    
     # Yarn installieren
     yarn install 2>&1 | grep -v "YN0060\|YN0002\|YN0086" || true
-    
-    # UI-Komponenten vorab bauen (für workspace:-Referenzen)
-    echo "🔨 Baue UI-Komponenten vor Maven-Build..."
-    cd components/nexus-ui-plugin
-    yarn build 2>&1 | grep -v "YN0000" || true
-    cd ../..
     
     echo ""
     cd ..
 }
 
+# Frontend-Komponenten bauen
+build_frontend() {
+    echo "🎨 Baue Frontend-Komponenten..."
+    cd "$NEXUS_DIR"
+    
+    # Baue nexus-ui-plugin
+    echo "  → Baue @sonatype/nexus-ui-plugin..."
+    cd components/nexus-ui-plugin
+    yarn build-all 2>&1 | tail -3
+    cd ../..
+    
+    # Baue nexus-rapture
+    echo "  → Baue @sonatype/nexus-rapture..."
+    cd components/nexus-rapture
+    yarn build-all 2>&1 | tail -3
+    cd ../..
+    
+    # Baue nexus-coreui-plugin
+    echo "  → Baue @sonatype/nexus-coreui-plugin..."
+    cd plugins/nexus-coreui-plugin
+    yarn build-all 2>&1 | tail -3
+    cd ../../..
+    
+    echo ""
+}
+
 # Build durchführen
 build_nexus() {
-    echo "🔨 Starte Build..."
+    echo "🔨 Starte Maven-Build (überspringe Frontend-Schritte)..."
     cd "$NEXUS_DIR"
     
     # JAVA_HOME sicherstellen
@@ -132,7 +149,7 @@ build_nexus() {
     # Maven Optionen für Performance
     export MAVEN_OPTS="-Xmx4g -XX:+UseG1GC"
     
-    echo "Führe schnellen Build ohne Tests durch..."
+        echo "Führe schnellen Build ohne Tests durch..."
     ./mvnw clean install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp
     
     echo ""
@@ -170,6 +187,7 @@ main() {
     check_requirements
     clone_or_update
     install_dependencies
+    build_frontend
     build_nexus
     find_artifacts
 }
