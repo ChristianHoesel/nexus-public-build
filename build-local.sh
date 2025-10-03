@@ -75,6 +75,13 @@ clone_or_update() {
         echo "📥 Clone Nexus Repository..."
         git clone --depth 1 --branch "$VERSION" https://github.com/sonatype/nexus-public.git "$NEXUS_DIR"
     fi
+    
+    # .gitignore im nexus-public Verzeichnis löschen
+    if [ -f "$NEXUS_DIR/.gitignore" ]; then
+        echo "🗑️  Entferne nexus-public/.gitignore..."
+        rm "$NEXUS_DIR/.gitignore"
+    fi
+    
     echo ""
 }
 
@@ -95,6 +102,7 @@ install_dependencies() {
     yarn install 2>&1 | grep -v "YN0060\|YN0002\|YN0086" || true
     
     echo ""
+    cd ..
 }
 
 # Build durchführen
