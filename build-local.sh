@@ -132,20 +132,8 @@ build_nexus() {
     # Maven Optionen für Performance
     export MAVEN_OPTS="-Xmx4g -XX:+UseG1GC"
     
-    # Frage ob Tests durchgeführt werden sollen
-    echo "Build-Optionen:"
-    echo "1) Schneller Build ohne Tests (empfohlen)"
-    echo "2) Vollständiger Build mit Tests"
-    read -p "Auswahl (1/2): " REPLY
-    echo
-    
-    if [[ $REPLY =~ ^[2]$ ]]; then
-        echo "Führe vollständigen Build mit Tests durch..."
-        ./mvnw clean install -Ppublic
-    else
-        echo "Führe schnellen Build ohne Tests durch..."
-        ./mvnw clean install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -B -ntp
-    fi
+    echo "Führe schnellen Build ohne Tests durch..."
+    ./mvnw clean install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp
     
     echo ""
 }
