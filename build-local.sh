@@ -76,10 +76,15 @@ clone_or_update() {
         git clone --depth 1 --branch "$VERSION" https://github.com/sonatype/nexus-public.git "$NEXUS_DIR"
     fi
     
-    # .gitignore im nexus-public Verzeichnis löschen
+    # .gitignore und .git im nexus-public Verzeichnis löschen
     if [ -f "$NEXUS_DIR/.gitignore" ]; then
         echo "🗑️  Entferne nexus-public/.gitignore..."
         rm "$NEXUS_DIR/.gitignore"
+    fi
+    
+    if [ -d "$NEXUS_DIR/.git" ]; then
+        echo "🗑️  Entferne nexus-public/.git Verzeichnis..."
+        rm -rf "$NEXUS_DIR/.git"
     fi
     
     echo ""
@@ -130,7 +135,7 @@ build_nexus() {
         ./mvnw clean install -Ppublic
     else
         echo "Führe schnellen Build ohne Tests durch..."
-        ./mvnw clean install -Ppublic -DskipTests -Dmaven.javadoc.skip=true
+        ./mvnw clean install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -B -ntp
     fi
     
     echo ""
