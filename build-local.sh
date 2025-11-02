@@ -6,6 +6,7 @@ set -e
 
 VERSION=${1:-"release-3.84.1-01"}
 NEXUS_DIR="nexus-public"
+PROJECT_VERSION=""
 
 echo "========================================"
 echo "Nexus OSS Local Build Script"
@@ -56,8 +57,9 @@ check_requirements() {
     else
         echo "✅ Aktiviere Corepack für Yarn 4.x..."
         corepack enable 2>/dev/null || true
+        corepack prepare yarn@4.9.1 --activate 2>/dev/null || true
     fi
-    
+
     YARN_VERSION=$(yarn --version 2>/dev/null || echo "nicht installiert")
     echo "✅ Yarn $YARN_VERSION gefunden"
     
@@ -92,6 +94,15 @@ clone_or_update() {
         fi
     fi
     
+    if [ -f "$NEXUS_DIR/pom.xml" ]; then
+        PROJECT_VERSION=$(grep '<version>' "$NEXUS_DIR/pom.xml" | sed 's/.*<version>\(.*\)<\/version>.*/\1/' | sed -n '2p')
+        PROJECT_VERSION=${PROJECT_VERSION:-custom}
+        echo "📌 Erkannte Projektversion: $PROJECT_VERSION"
+    else
+        PROJECT_VERSION="custom"
+        echo "⚠️  Konnte Projektversion nicht ermitteln, verwende Platzhalter '$PROJECT_VERSION'"
+    fi
+
     echo ""
 }
 
@@ -102,9 +113,13 @@ install_dependencies() {
     
     # Corepack für Yarn 4.x aktivieren
     corepack enable 2>/dev/null || true
-    
-    # Yarn installieren
-    yarn install 2>&1 | grep -v "YN0060\|YN0002\|YN0086" || true
+    corepack prepare yarn@4.9.1 --activate 2>/dev/null || true
+
+    # Yarn im node_modules Modus betreiben (Projekt erwartet klassische Struktur)
+    yarn config set nodeLinker node-modules
+
+    # Dependencies mit dem im Repository definierten Yarn installieren
+    yarn install
     
     echo ""
     cd ..
@@ -115,25 +130,10 @@ build_frontend() {
     echo "🎨 Baue Frontend-Komponenten..."
     cd "$NEXUS_DIR"
     
-    # Baue nexus-ui-plugin
-    echo "  → Baue @sonatype/nexus-ui-plugin..."
-    cd components/nexus-ui-plugin
-    yarn build-all 2>&1 | tail -3
-    cd ../..
-    
-    # Baue nexus-rapture
-    echo "  → Baue @sonatype/nexus-rapture..."
-    cd components/nexus-rapture
-    yarn build-all 2>&1 | tail -3
-    cd ../..
-    
-    # Baue nexus-coreui-plugin
-    echo "  → Baue @sonatype/nexus-coreui-plugin..."
-    cd plugins/nexus-coreui-plugin
-    yarn build-all 2>&1 | tail -3
-    cd ../../..
+    yarn workspaces foreach --all --topological-dev run build-all
     
     echo ""
+    cd ..
 }
 
 # Build durchführen
@@ -149,9 +149,30 @@ build_nexus() {
     # Maven Optionen für Performance
     export MAVEN_OPTS="-Xmx4g -XX:+UseG1GC"
     
-        echo "Führe schnellen Build ohne Tests durch..."
-    ./mvnw clean install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp
+    echo "Führe schnellen Build ohne Tests durch..."
+    ./mvnw install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp -Dskip.installyarn -Dskip.yarn
     
+    echo ""
+    cd ..
+}
+
+package_distribution() {
+    echo "📦 Verpacke Nexus Distribution..."
+    local assembly_dir="$NEXUS_DIR/assemblies/nexus-repository-core/target/assembly"
+    if [ ! -d "$assembly_dir" ]; then
+        echo "❌ Assemblierungsverzeichnis nicht gefunden: $assembly_dir"
+        return
+    fi
+
+    local target_dir="$NEXUS_DIR/assemblies/nexus-repository-core/target"
+    local base_name="nexus-${PROJECT_VERSION}"
+
+    echo "  • Erstelle ${base_name}-unix.tar.gz"
+    tar -czf "$target_dir/${base_name}-unix.tar.gz" -C "$assembly_dir" .
+
+    echo "  • Erstelle ${base_name}.zip"
+    (cd "$assembly_dir" && zip -qry "$target_dir/${base_name}.zip" .)
+
     echo ""
 }
 
@@ -189,6 +210,7 @@ main() {
     install_dependencies
     build_frontend
     build_nexus
+    package_distribution
     find_artifacts
 }
 
