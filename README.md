@@ -1,11 +1,11 @@
-# Nexus Public Build Rep3. Geben Sie die gewünschte Nexus-Version ein (z.B. `release-3.84.1-01`)sitory
+# Nexus Public Build Rep3.
 
 Dieses Repository dient als Build-Wrapper für [Sonatype Nexus Repository OSS](https://github.com/sonatype/nexus-public).
 
 ## Problem
 
 Das offizielle Nexus Public Repository hat einige Herausforderungen:
-- Für jede Version wird ein separater Branch erstellt (z.B. `release-3.84.1-01`)
+- Für jede Version wird ein separater Branch erstellt (z.B. `release-3.85.0-03`)
 - Der `main` Branch wird nur sporadisch aktualisiert (letztes Update: Februar 2025)
 - Releases werden als separate Branches und Tags gepflegt, nicht als kontinuierliche Entwicklung im main Branch
 - Der Build benötigt ein spezifisches Setup (Java 17, Yarn 1.22 & Maven Profil "public")
@@ -32,7 +32,8 @@ Nexus-Versionen finden Sie hier:
 - **Releases/Tags**: https://github.com/sonatype/nexus-public/releases
 
 Aktuelle Beispiele (Stand Oktober 2025):
-- `release-3.84.1-01` (neueste)
+- `release-3.85.0-03`  (neueste)
+- `release-3.84.1-01`
 - `release-3.84.0-03`
 - `release-3.83.2-01`
 - `release-3.82.1-08`
@@ -46,12 +47,12 @@ Falls Sie lokal bauen möchten:
 ```bash
 # Einfach das Build-Script verwenden
 chmod +x build-local.sh
-./build-local.sh release-3.84.1-01
+./build-local.sh release-3.85.0-03
 
 # Oder manuell:
 git clone https://github.com/sonatype/nexus-public.git
 cd nexus-public
-git checkout release-3.84.1-01
+git checkout release-3.85.0-03
 
 # Java 17 sicherstellen
 java -version
