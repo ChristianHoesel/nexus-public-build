@@ -68,7 +68,11 @@ jobs:
       - name: Install dependencies
         working-directory: nexus-public
         run: |
-          # .yarnrc.yml neu erstellen für Yarn 4 Kompatibilität
+          # Alle Yarn Konfigurationsdateien entfernen
+          rm -f .yarnrc.yml .yarnrc
+          find . -name ".yarnrc.yml" -o -name ".yarnrc" | xargs rm -f
+          
+          # Neue .yarnrc.yml für Yarn 4 erstellen
           cat > .yarnrc.yml << 'EOF'
           nodeLinker: node-modules
           EOF
