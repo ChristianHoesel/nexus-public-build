@@ -5,7 +5,7 @@ Dieses Repository dient als Build-Wrapper für [Sonatype Nexus Repository OSS](h
 ## Problem
 
 Das offizielle Nexus Public Repository hat einige Herausforderungen:
-- Für jede Version wird ein separater Branch erstellt (z.B. `release-3.85.0-03`)
+- Für jede Version wird ein separater Branch erstellt (z.B. `release-3.86.0-08`)
 - Der `main` Branch wird nur sporadisch aktualisiert (letztes Update: Februar 2025)
 - Releases werden als separate Branches und Tags gepflegt, nicht als kontinuierliche Entwicklung im main Branch
 - Der Build benötigt ein spezifisches Setup (Java 17, Yarn 1.22 & Maven Profil "public")
@@ -22,7 +22,7 @@ Dieses Repository automatisiert den Build-Prozess mit GitHub Actions und erstell
 1. Gehen Sie zum Tab "Actions" in diesem Repository
 2. Wählen Sie den Workflow "Build Nexus OSS"
 3. Klicken Sie auf "Run workflow"
-4. Geben Sie die gewünschte Nexus-Version ein (z.B. `release-3.72.0-04`)
+4. Geben Sie die gewünschte Nexus-Version ein (z.B. `release-3.86.0-08`)
 5. Die gebauten Artefakte finden Sie unter "Artifacts" nach Abschluss des Builds
 
 ### Verfügbare Versionen
@@ -31,12 +31,10 @@ Nexus-Versionen finden Sie hier:
 - **Branches**: https://github.com/sonatype/nexus-public/branches/all
 - **Releases/Tags**: https://github.com/sonatype/nexus-public/releases
 
-Aktuelle Beispiele (Stand Oktober 2025):
-- `release-3.85.0-03`  (neueste)
-- `release-3.84.1-01`
-- `release-3.84.0-03`
-- `release-3.83.2-01`
-- `release-3.82.1-08`
+Aktuelle Beispiele (Stand November 2025):
+- `release-3.86.0-08` (neueste)
+- `release-3.85.0-03`  
+
 
 **Hinweis**: Die Branch-Namen entsprechen den Release-Tags. Verwenden Sie den Branch-Namen für den Build.
 
@@ -47,12 +45,12 @@ Falls Sie lokal bauen möchten:
 ```bash
 # Einfach das Build-Script verwenden
 chmod +x build-local.sh
-./build-local.sh release-3.85.0-03
+./build-local.sh release-3.86.0-08
 
 # Oder manuell:
 git clone https://github.com/sonatype/nexus-public.git
 cd nexus-public
-git checkout release-3.85.0-03
+git checkout release-3.86.0-08
 
 # Java 17 sicherstellen
 java -version
