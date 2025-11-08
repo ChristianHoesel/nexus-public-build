@@ -71,8 +71,6 @@ jobs:
           # .yarnrc.yml neu erstellen für Yarn 4 Kompatibilität
           cat > .yarnrc.yml << 'EOF'
           nodeLinker: node-modules
-          
-          yarnPath: .yarn/releases/yarn-4.9.1.cjs
           EOF
           
           # Dependencies installieren
