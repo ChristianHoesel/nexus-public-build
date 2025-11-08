@@ -68,8 +68,8 @@ jobs:
       - name: Install dependencies
         working-directory: nexus-public
         run: |
-          # Yarn nodeLinker auf node-modules setzen für Kompatibilität
-          yarn config set nodeLinker node-modules
+          # Yarn nodeLinker auf node-modules setzen für Kompatibilität mit rspack/webpack
+          echo "nodeLinker: node-modules" >> .yarnrc.yml
           # Dependencies installieren
           yarn install
       
