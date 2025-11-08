@@ -68,8 +68,13 @@ jobs:
       - name: Install dependencies
         working-directory: nexus-public
         run: |
-          # Yarn nodeLinker auf node-modules setzen für Kompatibilität mit rspack/webpack
-          echo "nodeLinker: node-modules" >> .yarnrc.yml
+          # .yarnrc.yml neu erstellen für Yarn 4 Kompatibilität
+          cat > .yarnrc.yml << 'EOF'
+          nodeLinker: node-modules
+          
+          yarnPath: .yarn/releases/yarn-4.9.1.cjs
+          EOF
+          
           # Dependencies installieren
           yarn install
       
