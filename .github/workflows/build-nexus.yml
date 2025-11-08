@@ -10,7 +10,7 @@ on:
   push:
     branches:
       - main
-  schedule:
+  # schedule:
     # Wöchentlicher Build jeden Montag um 2 Uhr UTC
     # - cron: '0 2 * * 1'
 
