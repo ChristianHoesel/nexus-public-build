@@ -47,10 +47,11 @@ jobs:
         with:
           node-version: '18'
       
-      - name: Install Yarn 1.22
+      - name: Enable Corepack for Yarn 4
         run: |
-          npm install -g yarn@${YARN_LEGACY_VERSION}
-          echo "Installed Yarn version:"
+          corepack enable
+          corepack prepare yarn@4.9.1 --activate
+          echo "Corepack enabled, Yarn version:"
           yarn --version
       
       - name: Cache Yarn dependencies
@@ -67,26 +68,36 @@ jobs:
       - name: Install dependencies
         working-directory: nexus-public
         run: |
-          # Yarn 1.x für initiale Installation
-          yarn install --frozen-lockfile || yarn install
+          # Yarn nodeLinker auf node-modules setzen für Kompatibilität
+          yarn config set nodeLinker node-modules
+          # Dependencies installieren
+          yarn install
       
-      - name: Setup Yarn 4 (falls benötigt)
+      - name: Build Frontend Workspaces
         working-directory: nexus-public
         run: |
-          # Prüfen ob Yarn 4 benötigt wird
-          if [ -f ".yarnrc.yml" ]; then
-            echo "Yarn 4 configuration detected"
-            yarn set version ${YARN_MODERN_VERSION}
-            yarn --version
-          fi
+          # Alle Frontend-Workspaces bauen
+          yarn workspaces foreach --all --topological-dev run build-all
       
       - name: Build Nexus
         working-directory: nexus-public
         run: |
-          # Maven Build mit "public" Profil (erforderlich für OSS Build)
-          ./mvnw clean install -Ppublic -DskipTests -Dmaven.javadoc.skip=true
+          # Maven Build mit "public" Profil, Frontend-Schritte überspringen
+          ./mvnw install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp -Dskip.installyarn -Dskip.yarn
         env:
           MAVEN_OPTS: "-Xmx4g -XX:+UseG1GC"
+      
+      - name: Package Distribution
+        working-directory: nexus-public
+        run: |
+          # Projektversion aus POM extrahieren
+          PROJECT_VERSION=$(grep '<version>' pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/' | sed -n '2p')
+          echo "Packaging version: $PROJECT_VERSION"
+          
+          # Tar.gz und Zip Archive erstellen
+          cd assemblies/nexus-repository-core/target
+          tar -czf nexus-${PROJECT_VERSION}-unix.tar.gz -C assembly .
+          (cd assembly && zip -qry ../nexus-${PROJECT_VERSION}.zip .)
       
       - name: Run tests (optional)
         if: github.event_name == 'workflow_dispatch'
