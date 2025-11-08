@@ -16,8 +16,6 @@ on:
 
 env:
   JAVA_VERSION: '17'
-  YARN_LEGACY_VERSION: '1.22.22'
-  YARN_MODERN_VERSION: '4.5.3'
 
 jobs:
   build:
@@ -71,6 +69,9 @@ jobs:
           # Alle Yarn Konfigurationsdateien entfernen
           rm -f .yarnrc.yml .yarnrc
           find . -name ".yarnrc.yml" -o -name ".yarnrc" | xargs rm -f
+          
+          # Yarn Cache und globale Config zurücksetzen
+          rm -rf ~/.yarn ~/.yarnrc.yml ~/.yarnrc
           
           # Neue .yarnrc.yml für Yarn 4 erstellen
           cat > .yarnrc.yml << 'EOF'
