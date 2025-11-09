@@ -63,7 +63,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       
-      - name: Install dependencies
+      - name: Install dependencies with Yarn 4
         working-directory: nexus-public
         run: |
           # Alle Yarn Konfigurationsdateien entfernen
@@ -78,19 +78,29 @@ jobs:
           nodeLinker: node-modules
           EOF
           
-          # Dependencies installieren
+          # Dependencies installieren mit Yarn 4
           yarn install
       
-      - name: Build Frontend Workspaces
+      - name: Build Frontend Workspaces with Yarn 4
         working-directory: nexus-public
         run: |
-          # Alle Frontend-Workspaces bauen
+          # Alle Frontend-Workspaces mit Yarn 4 bauen
           yarn workspaces foreach --all --topological-dev run build-all
+      
+      - name: Switch to Yarn 1.x for Maven
+        run: |
+          # Corepack deaktivieren
+          corepack disable || true
+          # Yarn 1.22 global installieren für Maven
+          npm install -g yarn@1.22.22
+          echo "Switched to Yarn version:"
+          yarn --version
       
       - name: Build Nexus
         working-directory: nexus-public
         run: |
-          # Maven Build mit "public" Profil, Frontend-Schritte überspringen
+          # Maven Build mit "public" Profil
+          # Frontend wurde bereits mit Yarn 4 gebaut, Maven überspringt Frontend-Schritte
           ./mvnw install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp -Dskip.installyarn -Dskip.yarn
         env:
           MAVEN_OPTS: "-Xmx4g -XX:+UseG1GC"
