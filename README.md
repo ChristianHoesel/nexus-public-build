@@ -46,59 +46,54 @@ Falls Sie lokal bauen möchten:
 # Einfach das Build-Script verwenden
 chmod +x build-local.sh
 ./build-local.sh release-3.86.0-08
-
-# Oder manuell:
-git clone https://github.com/sonatype/nexus-public.git
-cd nexus-public
-git checkout release-3.86.0-08
-
-# Java 17 sicherstellen
-java -version
-
-# Yarn 1.22 installieren
-npm install -g yarn@1.22.22
-
-# Dependencies installieren
-yarn install
-
-# Build durchführen mit "public" Profil (ohne Tests für schnelleren Build)
-./mvnw clean install -Ppublic -DskipTests
-
-# Mit Tests
-./mvnw clean install -Ppublic
-
-# Die fertigen Artefakte finden Sie dann in:
-# assemblies/nexus-base-template/target/nexus-base-template-*.tar.gz
 ```
+
+Das Build-Script führt automatisch folgende Schritte aus:
+1. Klont das Nexus Public Repository
+2. Aktiviert Corepack und konfiguriert Yarn 4 mit `nodeLinker: node-modules`
+3. Installiert alle Dependencies mit Yarn 4
+4. Baut alle Frontend-Komponenten mit `yarn workspaces foreach run build-all`
+5. Wechselt zu Yarn 1.22.22 für Maven-Kompatibilität
+6. Führt Maven Build mit `-Ppublic -Dskip.installyarn -Dskip.yarn -DskipTests` aus
+7. Erstellt `.tar.gz` und `.zip` Distributionen
+
+Die fertigen Artefakte finden Sie dann im Workspace-Root:
+- `nexus-*-unix.tar.gz` (~133 MB)
+- `nexus-*-unix.zip`
 
 ## Build-Anforderungen
 
 - **Java**: OpenJDK 17 (Temurin empfohlen)
 - **Node.js**: Version 18 oder höher
-- **Yarn**: Version 1.22.x (für initiale Installation)
-- **Maven**: Wird über Maven Wrapper bereitgestellt
+- **Corepack**: Für Yarn 4 (mit `corepack enable` aktivieren)
+- **Yarn**: Version 4.9.1 für Frontend-Build, Version 1.22.22 für Maven (automatisch vom Build-Script verwaltet)
+- **Maven**: Wird über Maven Wrapper (`./mvnw`) bereitgestellt
 - **RAM**: Mindestens 4 GB für den Build-Prozess
+- **Disk**: ~2 GB für Dependencies und Build-Artefakte
 
-### Dev Container (Empfohlen)
+## Build-Prozess Details
 
-Dieses Repository enthält einen vollständig konfigurierten Dev Container:
+Der Build verwendet eine Zwei-Phasen-Strategie:
 
-```bash
-# In VS Code:
-# 1. Install "Dev Containers" Extension
-# 2. Cmd/Ctrl+Shift+P → "Dev Containers: Reopen in Container"
-# 3. Warten bis Setup abgeschlossen ist
-# 4. ./build-local.sh ausführen
-```
+**Phase 1: Frontend-Build mit Yarn 4**
+- Yarn 4.9.1 wird über Corepack aktiviert
+- `nodeLinker: node-modules` für rspack-Kompatibilität
+- Dependencies werden mit `yarn install --no-immutable` installiert
+- Frontend-Komponenten werden mit `yarn workspaces foreach run build-all` gebaut
 
-Der Dev Container enthält alle notwendigen Tools und Konfigurationen.
+**Phase 2: Maven-Build mit Yarn 1**
+- Wechsel zu Yarn 1.22.22 (via `npm install -g yarn@1.22.22`)
+- Maven-Build mit `-Ppublic` Profil
+- Flags `-Dskip.installyarn -Dskip.yarn` überspringen redundante Yarn-Schritte
+- `-DskipTests` beschleunigt den Build (Tests optional)
 
 ## Automatische Builds
 
-Der Workflow führt automatisch folgende Builds durch:
-- **Wöchentlich**: Jeden Montag um 2 Uhr UTC
-- **Bei Push**: Auf den main Branch
-- **Manuell**: Über workflow_dispatch
+Der GitHub Actions Workflow führt automatisch Builds durch:
+- **Bei Push**: Auf den main Branch  
+- **Manuell**: Über workflow_dispatch mit Versionsauswahl
+
+Wöchentliche automatische Builds sind derzeit deaktiviert (können via cron-Schedule aktiviert werden).
 
 ## Artefakte
 
@@ -108,58 +103,9 @@ Nach erfolgreichem Build werden folgende Artefakte bereitgestellt:
 
 Artefakte werden 30 Tage lang aufbewahrt.
 
-## Docker Image (Optional)
-
-Sie können die gebauten Artefakte verwenden, um ein eigenes Docker-Image zu erstellen:
-
-```bash
-# 1. Artefakte aus GitHub Actions herunterladen und in artifacts/ ablegen
-# 2. Docker Image bauen
-docker build -t nexus-oss:custom .
-
-# Oder mit docker-compose
-docker-compose up -d
-```
-
-## Häufige Probleme
-
-### Out of Memory beim Build
-
-Erhöhen Sie den Heap-Speicher:
-```bash
-export MAVEN_OPTS="-Xmx4g -XX:+UseG1GC"
-./mvnw clean install -Ppublic
-```
-
-### Yarn Version Konflikte
-
-Das Projekt könnte sowohl Yarn 1.x als auch Yarn 4.x benötigen. Der Workflow handhabt dies automatisch.
-
-### Tests schlagen fehl
-
-Verwenden Sie `-DskipTests` für einen schnelleren Build ohne Tests:
-```bash
-./mvnw clean install -Ppublic -DskipTests
-```
-
 ### Maven Profil "public"
 
 Das Maven-Profil `-Ppublic` ist **erforderlich** für den OSS-Build. Es aktiviert die notwendigen Module und Konfigurationen für die öffentliche Version von Nexus Repository.
-
-## Alternativen
-
-Falls Sie keinen eigenen Build durchführen möchten:
-
-1. **Offizielle Releases**: https://help.sonatype.com/repomanager3/product-information/download
-2. **Docker Images**: `docker pull sonatype/nexus3`
-3. **Helm Charts**: Für Kubernetes-Deployments
-
-## Warum kein Pull Request?
-
-Sie haben Recht - Pull Requests ans Haupt-Repository bringen wenig:
-- Sonatype verwendet einen internen Entwicklungsprozess
-- Die öffentlichen Branches sind nur Snapshots von Releases
-- Contributions werden über andere Kanäle koordiniert
 
 ## Lizenz
 
