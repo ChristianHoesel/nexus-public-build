@@ -78,8 +78,8 @@ jobs:
           nodeLinker: node-modules
           EOF
           
-          # Dependencies installieren mit Yarn 4
-          yarn install
+          # Dependencies installieren mit Yarn 4 (erlaube Lockfile-Erstellung)
+          yarn install --no-immutable
       
       - name: Build Frontend Workspaces with Yarn 4
         working-directory: nexus-public
