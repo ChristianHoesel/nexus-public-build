@@ -4,21 +4,21 @@ set -e
 echo "🚀 Nexus Public Build Environment Setup"
 echo "========================================"
 
-# Aktiviere Corepack für Yarn 4.x Unterstützung
-echo "📦 Aktiviere Corepack für Yarn 4.x..."
+# Enable Corepack for Yarn 4.x support
+echo "📦 Enabling Corepack for Yarn 4.x..."
 corepack enable
 
-# JAVA_HOME setzen
+# Set JAVA_HOME
 if [ -z "$JAVA_HOME" ]; then
     export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
     echo "export JAVA_HOME=$JAVA_HOME" >> ~/.bashrc
     echo "export MAVEN_OPTS=\"-Xmx4g -XX:+UseG1GC\"" >> ~/.bashrc
-    echo "✅ JAVA_HOME in ~/.bashrc gesetzt"
+    echo "✅ JAVA_HOME set in ~/.bashrc"
 fi
 
-# Verifiziere Installationen
+# Verify installations
 echo ""
-echo "✅ Installierte Versionen:"
+echo "✅ Installed versions:"
 echo "   Java: $(java -version 2>&1 | head -n 1)"
 echo "   JAVA_HOME: $JAVA_HOME"
 echo "   Node: $(node -v)"
@@ -27,25 +27,25 @@ echo "   Corepack: $(corepack --version)"
 echo "   Maven: $(mvn -v | head -n 1)"
 echo "   Git: $(git --version)"
 
-# Mache Build-Script ausführbar
+# Make build script executable
 echo ""
-echo "🔧 Setze Berechtigungen..."
+echo "🔧 Setting permissions..."
 chmod +x build-local.sh
 
-# Konfiguriere Git (falls noch nicht konfiguriert)
+# Configure Git (if not already configured)
 if ! git config --global user.name > /dev/null 2>&1; then
     echo ""
-    echo "ℹ️  Git-Konfiguration nicht gefunden."
-    echo "   Sie können diese später mit folgenden Befehlen setzen:"
-    echo "   git config --global user.name 'Ihr Name'"
-    echo "   git config --global user.email 'ihre.email@example.com'"
+    echo "ℹ️  Git configuration not found."
+    echo "   You can set this later with the following commands:"
+    echo "   git config --global user.name 'Your Name'"
+    echo "   git config --global user.email 'your.email@example.com'"
 fi
 
 echo ""
-echo "✨ Setup abgeschlossen!"
+echo "✨ Setup complete!"
 echo ""
-echo "🎯 Nächste Schritte:"
-echo "   1. Build durchführen: ./build-local.sh release-3.84.1-01"
-echo "   2. Oder direkt in GitHub Actions testen"
-echo "   3. Docker Image bauen (optional)"
+echo "🎯 Next steps:"
+echo "   1. Run build: ./build-local.sh release-3.84.1-01"
+echo "   2. Or test directly in GitHub Actions"
+echo "   3. Build Docker image (optional)"
 echo ""

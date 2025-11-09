@@ -1,80 +1,80 @@
-# Dev Container für Nexus Public Build
+# Dev Container for Nexus Public Build
 
-Dieser Dev Container stellt eine vollständige Build-Umgebung für Sonatype Nexus Repository OSS bereit.
+This dev container provides a complete build environment for Sonatype Nexus Repository OSS.
 
-## Enthaltene Tools
+## Included Tools
 
 - **Java 17** (OpenJDK via Microsoft Dev Container)
 - **Node.js 18**
-- **Yarn 1.22.22** (global installiert)
-- **Maven** (via Maven Wrapper im Nexus-Projekt)
+- **Yarn 1.22.22** (installed globally)
+- **Maven** (via Maven Wrapper in Nexus project)
 - **Git**
 - **GitHub CLI** (`gh`)
-- **Docker-in-Docker** (für Docker-Image Builds)
+- **Docker-in-Docker** (for Docker image builds)
 
-## Automatische Konfiguration
+## Automatic Configuration
 
-Beim ersten Start des Containers werden automatisch:
-- Yarn 1.22.22 installiert
-- Das Build-Script ausführbar gemacht
-- Maven und Yarn Caches als Volumes gemountet (für schnellere Builds)
-- Port 8081 für Nexus weitergeleitet
+On first start of the container:
+- Yarn 1.22.22 is installed
+- The build script is made executable
+- Maven and Yarn caches are mounted as volumes (for faster builds)
+- Port 8081 is forwarded for Nexus
 
-## Verwendung
+## Usage
 
-### Container starten
+### Starting the Container
 
-1. In VS Code die Command Palette öffnen (`Ctrl+Shift+P` / `Cmd+Shift+P`)
-2. "Dev Containers: Reopen in Container" wählen
-3. Warten bis der Container gebaut und konfiguriert ist
+1. Open the Command Palette in VS Code (`Ctrl+Shift+P` / `Cmd+Shift+P`)
+2. Select "Dev Containers: Reopen in Container"
+3. Wait for the container to be built and configured
 
-### Nexus bauen
+### Building Nexus
 
 ```bash
-# Schneller Build der neuesten Version
+# Quick build of the latest version
 ./build-local.sh
 
-# Spezifische Version bauen
+# Build specific version
 ./build-local.sh release-3.84.1-01
 
-# Oder manuell
+# Or manually
 cd nexus-public
 ./mvnw clean install -Ppublic -DskipTests
 ```
 
-### GitHub Actions lokal testen
+### Testing GitHub Actions locally
 
 ```bash
-# GitHub CLI verwenden
+# Use GitHub CLI
 gh workflow view
 gh workflow run build-nexus.yml
 ```
 
-### Docker Image bauen
+### Building Docker Image
 
 ```bash
-# Nachdem der Build abgeschlossen ist
+# After the build is complete
 docker build -t nexus-oss:custom .
 docker-compose up -d
 ```
 
-## Performance-Optimierungen
+## Performance Optimizations
 
-- **Maven Cache**: Persistentes Volume für Maven-Dependencies
-- **Yarn Cache**: Persistentes Volume für Yarn-Dependencies
-- **Memory**: 4GB Heap für Maven-Builds via `MAVEN_OPTS`
+- **Maven Cache**: Persistent volume for Maven dependencies
+- **Yarn Cache**: Persistent volume for Yarn dependencies
+- **Memory**: 4GB heap for Maven builds via `MAVEN_OPTS`
 
 ## Volumes
 
-Der Container verwendet folgende persistente Volumes:
+The container uses the following persistent volumes:
 - `nexus-build-maven-cache`: Maven Repository Cache (~/.m2)
 - `nexus-build-yarn-cache`: Yarn Global Cache
 
-Diese bleiben zwischen Container-Neustarts erhalten und beschleunigen Builds erheblich.
+These persist between container restarts and significantly speed up builds.
 
 ## VS Code Extensions
 
-Automatisch installierte Extensions:
+Automatically installed extensions:
 - Java Extension Pack
 - Maven for Java
 - Language Support for Java (Red Hat)
@@ -84,13 +84,13 @@ Automatisch installierte Extensions:
 
 ## Ports
 
-- **8081**: Nexus Repository (falls lokal gestartet)
+- **8081**: Nexus Repository (if started locally)
 
 ## Troubleshooting
 
-### Yarn Version Fehler
+### Yarn Version Error
 
-Falls Sie einen Fehler wie "packageManager: yarn@4.9.1" sehen:
+If you see an error like "packageManager: yarn@4.9.1":
 
 ```bash
 corepack enable
@@ -98,28 +98,28 @@ cd nexus-public
 yarn install
 ```
 
-Das Build-Script aktiviert Corepack jetzt automatisch.
+The build script now automatically enables Corepack.
 
-### JAVA_HOME nicht gesetzt
+### JAVA_HOME not set
 
-Falls Maven sich über JAVA_HOME beschwert:
+If Maven complains about JAVA_HOME:
 
 ```bash
 export JAVA_HOME=$(dirname $(dirname $(readlink -f $(which java))))
 ./build-local.sh
 ```
 
-Das Build-Script setzt JAVA_HOME jetzt automatisch.
+The build script now automatically sets JAVA_HOME.
 
-### Out of Memory beim Build
+### Out of Memory during Build
 
-Die Umgebungsvariable `MAVEN_OPTS` ist bereits auf 4GB gesetzt. Falls Sie mehr benötigen:
+The `MAVEN_OPTS` environment variable is already set to 4GB. If you need more:
 
 ```bash
 export MAVEN_OPTS="-Xmx6g -XX:+UseG1GC"
 ```
 
-### Cache löschen
+### Clear Cache
 
 ```bash
 # Maven Cache
@@ -129,7 +129,7 @@ rm -rf ~/.m2/repository
 yarn cache clean
 ```
 
-### Container neu bauen
+### Rebuild Container
 
 ```bash
 # In VS Code Command Palette:

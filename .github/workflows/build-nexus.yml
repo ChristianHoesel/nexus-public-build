@@ -11,7 +11,7 @@ on:
     branches:
       - main
   # schedule:
-    # Wöchentlicher Build jeden Montag um 2 Uhr UTC
+    # Weekly build every Monday at 2 AM UTC
     # - cron: '0 2 * * 1'
 
 env:
@@ -66,32 +66,32 @@ jobs:
       - name: Install dependencies with Yarn 4
         working-directory: nexus-public
         run: |
-          # Alle Yarn Konfigurationsdateien entfernen
+          # Remove all Yarn configuration files
           rm -f .yarnrc.yml .yarnrc
           find . -name ".yarnrc.yml" -o -name ".yarnrc" | xargs rm -f
           
-          # Yarn Cache und globale Config zurücksetzen
+          # Reset Yarn cache and global config
           rm -rf ~/.yarn ~/.yarnrc.yml ~/.yarnrc
           
-          # Neue .yarnrc.yml für Yarn 4 erstellen
+          # Create new .yarnrc.yml for Yarn 4
           cat > .yarnrc.yml << 'EOF'
           nodeLinker: node-modules
           EOF
           
-          # Dependencies installieren mit Yarn 4 (erlaube Lockfile-Erstellung)
+          # Install dependencies with Yarn 4 (allow lockfile creation)
           yarn install --no-immutable
       
       - name: Build Frontend Workspaces with Yarn 4
         working-directory: nexus-public
         run: |
-          # Alle Frontend-Workspaces mit Yarn 4 bauen
+          # Build all frontend workspaces with Yarn 4
           yarn workspaces foreach --all --topological-dev run build-all
       
       - name: Switch to Yarn 1.x for Maven
         run: |
-          # Corepack deaktivieren
+          # Disable Corepack
           corepack disable || true
-          # Yarn 1.22 global installieren für Maven
+          # Install Yarn 1.22 globally for Maven
           npm install -g yarn@1.22.22
           echo "Switched to Yarn version:"
           yarn --version
@@ -99,8 +99,8 @@ jobs:
       - name: Build Nexus
         working-directory: nexus-public
         run: |
-          # Maven Build mit "public" Profil
-          # Frontend wurde bereits mit Yarn 4 gebaut, Maven überspringt Frontend-Schritte
+          # Maven build with "public" profile
+          # Frontend was already built with Yarn 4, Maven skips frontend steps
           ./mvnw install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp -Dskip.installyarn -Dskip.yarn
         env:
           MAVEN_OPTS: "-Xmx4g -XX:+UseG1GC"
@@ -108,11 +108,11 @@ jobs:
       - name: Package Distribution
         working-directory: nexus-public
         run: |
-          # Projektversion aus POM extrahieren
+          # Extract project version from POM
           PROJECT_VERSION=$(grep '<version>' pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/' | sed -n '2p')
           echo "Packaging version: $PROJECT_VERSION"
           
-          # Tar.gz und Zip Archive erstellen
+          # Create tar.gz and zip archives
           cd assemblies/nexus-repository-core/target
           tar -czf nexus-${PROJECT_VERSION}-unix.tar.gz -C assembly .
           (cd assembly && zip -qry ../nexus-${PROJECT_VERSION}.zip .)
@@ -170,5 +170,5 @@ jobs:
       
       - name: Build Docker image (optional)
         run: |
-          echo "Docker image build kann hier implementiert werden"
+          echo "Docker image build can be implemented here"
           # docker build -t nexus-oss:custom .
