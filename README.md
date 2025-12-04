@@ -13,7 +13,22 @@ The official Nexus Public Repository has some challenges:
 
 ## Solution
 
-This repository automates the build process with GitHub Actions and creates usable artifacts.
+This repository automates the build process with GitHub Actions and creates usable artifacts:
+- **Build artifacts**: `.tar.gz` and `.zip` distributions
+- **Docker images**: Automatically built and published to GitHub Container Registry
+
+## Quick Start with Docker
+
+The fastest way to run Nexus OSS is using the pre-built Docker image:
+
+```bash
+docker pull ghcr.io/christianhoesel/nexus-public-build:latest
+docker run -d -p 8081:8081 -v nexus-data:/nexus-data ghcr.io/christianhoesel/nexus-public-build:latest
+```
+
+Access Nexus at http://localhost:8081
+
+For detailed Docker usage, configuration, and troubleshooting, see [DOCKER.md](DOCKER.md).
 
 ## Usage
 
@@ -98,10 +113,31 @@ Weekly automatic builds are currently disabled (can be enabled via cron schedule
 ## Artifacts
 
 After a successful build, the following artifacts are provided:
+
+### Build Artifacts
 - `nexus-*.tar.gz` - Unix/Linux distribution
 - `nexus-*.zip` - Windows distribution
 
 Artifacts are kept for 30 days.
+
+### Docker Images
+
+Docker images are automatically built and published to the GitHub Container Registry:
+- **Registry**: `ghcr.io/christianhoesel/nexus-public-build`
+- **Tags**: 
+  - `latest` - Latest build from main branch
+  - `<version>` - Specific Nexus version (e.g., `3.86.0-08`)
+  - `<branch>-<sha>` - Branch-specific builds
+
+```bash
+# Pull latest version
+docker pull ghcr.io/christianhoesel/nexus-public-build:latest
+
+# Pull specific version
+docker pull ghcr.io/christianhoesel/nexus-public-build:3.86.0-08
+```
+
+See [DOCKER.md](DOCKER.md) for complete Docker usage documentation.
 
 ### Maven Profile "public"
 
