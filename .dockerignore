@@ -1,0 +1,31 @@
+# Git
+.git
+.gitignore
+.github
+
+# Documentation
+README.md
+*.md
+
+# Build scripts
+build-local.sh
+
+# Dev environment
+.devcontainer
+.vscode
+.idea
+*.iml
+
+# Temporary and build artifacts (except the ones we need)
+nexus-public/
+node_modules/
+target/
+.yarn/
+.mvn/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

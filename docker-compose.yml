@@ -1,0 +1,24 @@
+services:
+  nexus:
+    image: ghcr.io/christianhoesel/nexus-public-build:latest
+    container_name: nexus-oss
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    volumes:
+      - nexus-data:/nexus-data
+    environment:
+      # JVM Settings
+      - INSTALL4J_ADD_VM_PARAMS=-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-data/javaprefs
+      # Nexus Context Path (leave empty for root or set to /nexus for /nexus path)
+      - NEXUS_CONTEXT=
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 180s
+
+volumes:
+  nexus-data:
+    driver: local
