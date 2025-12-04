@@ -112,10 +112,21 @@ jobs:
           PROJECT_VERSION=$(grep '<version>' pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/' | sed -n '2p')
           echo "Packaging version: $PROJECT_VERSION"
 
-          # Create tar.gz and zip archives
           cd assemblies/nexus-repository-core/target
-          tar -czf nexus-${PROJECT_VERSION}-unix.tar.gz -C assembly .
-          (cd assembly && zip -qry ../nexus-${PROJECT_VERSION}.zip .)
+
+          STAGING_DIR="nexus-${PROJECT_VERSION}"
+          rm -rf "$STAGING_DIR"
+          mkdir "$STAGING_DIR"
+
+          # copy the assembly contents into the named top-level folder
+          cp -a assembly/. "$STAGING_DIR"/
+
+          # create tarball and zip with a top-level folder
+          tar -czf "${STAGING_DIR}-unix.tar.gz" "$STAGING_DIR"
+          zip -qr "nexus-${PROJECT_VERSION}.zip" "$STAGING_DIR"
+
+          # cleanup
+          rm -rf "$STAGING_DIR"
 
       - name: Run tests (optional)
         if: github.event_name == 'workflow_dispatch'
