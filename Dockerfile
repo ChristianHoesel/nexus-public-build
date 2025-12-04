@@ -38,7 +38,15 @@ WORKDIR ${SONATYPE_DIR}
 # Copy and extract Nexus distribution
 COPY --chown=nexus:nexus nexus-*.tar.gz /tmp/nexus.tar.gz
 RUN tar -xzf /tmp/nexus.tar.gz -C ${SONATYPE_DIR} && \
-    mv ${SONATYPE_DIR}/nexus-* ${NEXUS_HOME} && \
+    EXTRACTED_DIR=$(ls -d ${SONATYPE_DIR}/nexus-* 2>/dev/null | head -n 1) && \
+    if [ -n "$EXTRACTED_DIR" ]; then \
+      mv "$EXTRACTED_DIR" ${NEXUS_HOME}; \
+    else \
+      # No top-level nexus-<version> directory found; move all extracted content into ${NEXUS_HOME}
+      mkdir -p ${NEXUS_HOME} && \
+      # move visible files/dirs except lost+found if present
+      sh -c 'for p in ${SONATYPE_DIR}/*; do if [ "$p" != "${NEXUS_HOME}" ]; then mv "$p" ${NEXUS_HOME}/ || true; fi; done' ; \
+    fi && \
     rm /tmp/nexus.tar.gz
 
 # Configure Nexus to use the data directory
