@@ -44,8 +44,7 @@ RUN tar -xzf /tmp/nexus.tar.gz -C ${SONATYPE_DIR} && \
     else \
       # No top-level nexus-<version> directory found; move all extracted content into ${NEXUS_HOME}
       mkdir -p ${NEXUS_HOME} && \
-      # move visible files/dirs except lost+found if present
-      sh -c 'for p in ${SONATYPE_DIR}/*; do if [ "$p" != "${NEXUS_HOME}" ]; then mv "$p" ${NEXUS_HOME}/ || true; fi; done' ; \
+      find ${SONATYPE_DIR} -maxdepth 1 -mindepth 1 ! -path ${NEXUS_HOME} -exec mv {} ${NEXUS_HOME}/ \; ; \
     fi && \
     rm /tmp/nexus.tar.gz
 
