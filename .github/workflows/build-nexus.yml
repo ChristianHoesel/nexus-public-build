@@ -123,7 +123,7 @@ jobs:
 
           # create tarball and zip with a top-level folder
           tar -czf "${STAGING_DIR}-unix.tar.gz" "$STAGING_DIR"
-          (cd "$STAGING_DIR" && zip -qr "../nexus-${PROJECT_VERSION}.zip" .)
+          zip -qr "nexus-${PROJECT_VERSION}.zip" "$STAGING_DIR"
 
           # cleanup
           rm -rf "$STAGING_DIR"
