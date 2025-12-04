@@ -14,7 +14,7 @@ ENV NEXUS_HOME=${SONATYPE_DIR}/nexus \
 
 # Configure Java environment
 ENV JAVA_HOME=/opt/java/openjdk \
-    JAVA_OPTS="-XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap"
+    JAVA_OPTS="-XX:+UseG1GC -XX:+UseContainerSupport"
 
 # Install curl for health check
 RUN apt-get update && \
