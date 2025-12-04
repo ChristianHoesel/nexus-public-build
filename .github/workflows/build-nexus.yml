@@ -20,11 +20,11 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
-      
+
       - name: Checkout Nexus Public
         uses: actions/checkout@v4
         with:
@@ -32,26 +32,26 @@ jobs:
           ref: ${{ github.event.inputs.nexus_version || 'release-3.86.0-08' }}
           path: nexus-public
           fetch-depth: 1
-      
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
           cache: 'maven'
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-      
+
       - name: Enable Corepack for Yarn 4
         run: |
           corepack enable
           corepack prepare yarn@4.9.1 --activate
           echo "Corepack enabled, Yarn version:"
           yarn --version
-      
+
       - name: Cache Yarn dependencies
         uses: actions/cache@v4
         with:
@@ -62,31 +62,31 @@ jobs:
           key: ${{ runner.os }}-yarn-${{ hashFiles('nexus-public/**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
-      
+
       - name: Install dependencies with Yarn 4
         working-directory: nexus-public
         run: |
           # Remove all Yarn configuration files
           rm -f .yarnrc.yml .yarnrc
           find . -name ".yarnrc.yml" -o -name ".yarnrc" | xargs rm -f
-          
+
           # Reset Yarn cache and global config
           rm -rf ~/.yarn ~/.yarnrc.yml ~/.yarnrc
-          
+
           # Create new .yarnrc.yml for Yarn 4
           cat > .yarnrc.yml << 'EOF'
           nodeLinker: node-modules
           EOF
-          
+
           # Install dependencies with Yarn 4 (allow lockfile creation)
           yarn install --no-immutable
-      
+
       - name: Build Frontend Workspaces with Yarn 4
         working-directory: nexus-public
         run: |
           # Build all frontend workspaces with Yarn 4
           yarn workspaces foreach --all --topological-dev run build-all
-      
+
       - name: Switch to Yarn 1.x for Maven
         run: |
           # Disable Corepack
@@ -95,7 +95,7 @@ jobs:
           npm install -g yarn@1.22.22
           echo "Switched to Yarn version:"
           yarn --version
-      
+
       - name: Build Nexus
         working-directory: nexus-public
         run: |
@@ -104,32 +104,32 @@ jobs:
           ./mvnw install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp -Dskip.installyarn -Dskip.yarn
         env:
           MAVEN_OPTS: "-Xmx4g -XX:+UseG1GC"
-      
+
       - name: Package Distribution
         working-directory: nexus-public
         run: |
           # Extract project version from POM
           PROJECT_VERSION=$(grep '<version>' pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/' | sed -n '2p')
           echo "Packaging version: $PROJECT_VERSION"
-          
+
           # Create tar.gz and zip archives
           cd assemblies/nexus-repository-core/target
           tar -czf nexus-${PROJECT_VERSION}-unix.tar.gz -C assembly .
           (cd assembly && zip -qry ../nexus-${PROJECT_VERSION}.zip .)
-      
+
       - name: Run tests (optional)
         if: github.event_name == 'workflow_dispatch'
         working-directory: nexus-public
         run: |
           ./mvnw verify -Ppublic
         continue-on-error: true
-      
+
       - name: Find built artifacts
         id: artifacts
         run: |
           echo "Finding Nexus artifacts..."
           find nexus-public -name "nexus-*.tar.gz" -o -name "nexus-*.zip" | tee artifacts.txt
-          
+
       - name: Upload Nexus artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -139,7 +139,7 @@ jobs:
             nexus-public/**/target/nexus-*.zip
           retention-days: 30
           if-no-files-found: warn
-      
+
       - name: Create Release (on tag)
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
@@ -157,17 +157,17 @@ jobs:
     permissions:
       contents: read
       packages: write
-    
+
     steps:
       - name: Checkout this repository
         uses: actions/checkout@v4
-      
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: nexus-oss-build-${{ github.event.inputs.nexus_version || 'latest' }}
           path: ./artifacts
-      
+
       - name: Extract Nexus version from artifact
         id: version
         run: |
@@ -177,25 +177,25 @@ jobs:
             echo "No Nexus tarball found!"
             exit 1
           fi
-          
+
           # Extract version from filename (e.g., nexus-3.86.0-08-unix.tar.gz -> 3.86.0-08)
           VERSION=$(basename "$TARBALL" | sed 's/nexus-\(.*\)-unix\.tar\.gz/\1/')
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
           echo "Detected Nexus version: ${VERSION}"
-          
+
           # Copy tarball to root for Docker build
           cp "$TARBALL" ./nexus-${VERSION}.tar.gz
-      
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
+
       - name: Extract metadata for Docker
         id: meta
         uses: docker/metadata-action@v5
@@ -205,7 +205,7 @@ jobs:
             type=raw,value=${{ steps.version.outputs.version }}
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,prefix={{branch}}-
-      
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -217,6 +217,6 @@ jobs:
             NEXUS_VERSION=${{ steps.version.outputs.version }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      
+
       - name: Image digest
         run: echo "Docker image pushed successfully with tags ${{ steps.meta.outputs.tags }}"
