@@ -1,8 +1,7 @@
 FROM eclipse-temurin:17-jre-jammy
 
-# Set Nexus version as build argument
-ARG NEXUS_VERSION=3.86.0-08
-ARG NEXUS_DOWNLOAD_URL=file:///tmp/nexus.tar.gz
+# Set Nexus version as build argument (passed from CI build)
+ARG NEXUS_VERSION
 
 # Nexus configuration
 ENV SONATYPE_DIR=/opt/sonatype
@@ -15,6 +14,13 @@ ENV NEXUS_HOME=${SONATYPE_DIR}/nexus \
 # Configure Java environment
 ENV JAVA_HOME=/opt/java/openjdk \
     JAVA_OPTS="-XX:+UseG1GC -XX:+UseContainerSupport"
+
+# Add labels with version information
+LABEL org.opencontainers.image.title="Nexus Repository OSS" \
+      org.opencontainers.image.description="Sonatype Nexus Repository OSS" \
+      org.opencontainers.image.version="${NEXUS_VERSION}" \
+      org.opencontainers.image.vendor="Sonatype" \
+      org.opencontainers.image.source="https://github.com/ChristianHoesel/nexus-public-build"
 
 # Install curl for health check
 RUN apt-get update && \
