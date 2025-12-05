@@ -8,16 +8,14 @@ ENV NEXUS_DATA=/nexus-data
 ENV SONATYPE_DIR=/opt/sonatype
 ENV NEXUS_HOME=${SONATYPE_DIR}/nexus \
     NEXUS_CONTEXT='' \
-    SONATYPE_WORK=${NEXUS_DATA}/sonatype-work
+    SONATYPE_WORK=${SONATYPE_DIR}/sonatype-work
 
 # JVM configuration via INSTALL4J_ADD_VM_PARAMS (required for Nexus 3.78+)
 # Note: Since Nexus 3.78, nexus.vmoptions is no longer used in Docker containers
 # See: https://help.sonatype.com/en/configuring-the-runtime-environment.html
+# Note: Nexus expects data in ${SONATYPE_WORK}/nexus3, we symlink it to ${NEXUS_DATA}
 ENV INSTALL4J_ADD_VM_PARAMS="-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m \
-    -Djava.util.prefs.userRoot=${NEXUS_DATA}/javaprefs \
-    -Dkaraf.data=${NEXUS_DATA} \
-    -Djava.io.tmpdir=${NEXUS_DATA}/tmp \
-    -Dkaraf.log=${NEXUS_DATA}/log"
+    -Djava.util.prefs.userRoot=${NEXUS_DATA}/javaprefs"
 
 # Configure Java environment
 ENV JAVA_HOME=/opt/java/openjdk \
@@ -69,6 +67,9 @@ RUN tar -xzf /tmp/nexus.tar.gz -C ${SONATYPE_DIR} && \
     ls -la ${NEXUS_HOME}/bin/ 2>/dev/null || echo "Note: bin directory not found (expected for Nexus 3.78+)" && \
     # Create necessary directories in NEXUS_DATA
     mkdir -p ${NEXUS_DATA}/etc ${NEXUS_DATA}/log ${NEXUS_DATA}/tmp && \
+    # Create sonatype-work directory and symlink nexus3 -> NEXUS_DATA (as in official image)
+    mkdir -p ${SONATYPE_WORK} && \
+    ln -s ${NEXUS_DATA} ${SONATYPE_WORK}/nexus3 && \
     # Ensure files and directories have correct permissions (execute bit on dirs and bin scripts)
     # - set read+execute for directories and read for files where appropriate
     chmod -R a+rX ${NEXUS_HOME} || true && \
