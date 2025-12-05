@@ -121,6 +121,14 @@ jobs:
           # copy the assembly contents into the named top-level folder
           cp -a assembly/. "$STAGING_DIR"/
 
+          # Ensure correct Unix permissions before creating tarball
+          # - directories and files readable, directories executable
+          chmod -R u+rwX,go+rX "$STAGING_DIR"
+          # - scripts in bin/ must be executable
+          if [ -d "$STAGING_DIR/bin" ]; then
+            chmod +x "$STAGING_DIR/bin"/*
+          fi
+
           # create tarball and zip with a top-level folder
           tar -czf "${STAGING_DIR}-unix.tar.gz" "$STAGING_DIR"
           zip -qr "nexus-${PROJECT_VERSION}.zip" "$STAGING_DIR"
