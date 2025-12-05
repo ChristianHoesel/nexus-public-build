@@ -8,7 +8,7 @@ ENV NEXUS_DATA=/nexus-data
 ENV SONATYPE_DIR=/opt/sonatype
 ENV NEXUS_HOME=${SONATYPE_DIR}/nexus \
     NEXUS_CONTEXT='' \
-    SONATYPE_WORK=${SONATYPE_DIR}/sonatype-work
+    SONATYPE_WORK=${NEXUS_DATA}/sonatype-work
 
 # JVM configuration via INSTALL4J_ADD_VM_PARAMS (required for Nexus 3.78+)
 # Note: Since Nexus 3.78, nexus.vmoptions is no longer used in Docker containers
