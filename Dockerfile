@@ -69,6 +69,11 @@ RUN tar -xzf /tmp/nexus.tar.gz -C ${SONATYPE_DIR} && \
     ls -la ${NEXUS_HOME}/bin/ 2>/dev/null || echo "Note: bin directory not found (expected for Nexus 3.78+)" && \
     # Create necessary directories in NEXUS_DATA
     mkdir -p ${NEXUS_DATA}/etc ${NEXUS_DATA}/log ${NEXUS_DATA}/tmp && \
+    # Ensure files and directories have correct permissions (execute bit on dirs and bin scripts)
+    # - set read+execute for directories and read for files where appropriate
+    chmod -R a+rX ${NEXUS_HOME} || true && \
+    # ensure scripts in bin are executable if present
+    if [ -d "${NEXUS_HOME}/bin" ]; then find ${NEXUS_HOME}/bin -type f -exec chmod a+x {} \; || true; fi && \
     chown -R nexus:nexus ${NEXUS_HOME} ${NEXUS_DATA}
 
 # Expose Nexus port
