@@ -3,10 +3,10 @@ FROM eclipse-temurin:17-jre-jammy
 # Set Nexus version as build argument (passed from CI build)
 ARG NEXUS_VERSION
 
-# Nexus configuration
+# Nexus configuration - NEXUS_DATA must be defined first as it's used in other variables
+ENV NEXUS_DATA=/nexus-data
 ENV SONATYPE_DIR=/opt/sonatype
 ENV NEXUS_HOME=${SONATYPE_DIR}/nexus \
-    NEXUS_DATA=/nexus-data \
     NEXUS_CONTEXT='' \
     SONATYPE_WORK=${SONATYPE_DIR}/sonatype-work \
     INSTALL4J_ADD_VM_PARAMS="-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=${NEXUS_DATA}/javaprefs"
@@ -38,20 +38,51 @@ WORKDIR ${SONATYPE_DIR}
 # Copy and extract Nexus distribution
 COPY --chown=nexus:nexus nexus-*.tar.gz /tmp/nexus.tar.gz
 RUN tar -xzf /tmp/nexus.tar.gz -C ${SONATYPE_DIR} && \
+    # Debug: Show what was extracted
+    echo "=== Contents of ${SONATYPE_DIR} after extraction ===" && \
+    ls -la ${SONATYPE_DIR}/ && \
+    # Try to find and rename the nexus directory
     EXTRACTED_DIR=$(ls -d ${SONATYPE_DIR}/nexus-* 2>/dev/null | head -n 1) && \
     if [ -n "$EXTRACTED_DIR" ]; then \
+      echo "Found extracted directory: $EXTRACTED_DIR" && \
       mv "$EXTRACTED_DIR" ${NEXUS_HOME}; \
     else \
-      # No top-level nexus-<version> directory found; move all extracted content into ${NEXUS_HOME}
-      mkdir -p ${NEXUS_HOME} && \
-      find ${SONATYPE_DIR} -maxdepth 1 -mindepth 1 -type d ! -name "nexus" -exec mv {} ${NEXUS_HOME}/ \; 2>/dev/null || true && \
-      find ${SONATYPE_DIR} -maxdepth 1 -mindepth 1 -type f -exec mv {} ${NEXUS_HOME}/ \; 2>/dev/null || true ; \
+      echo "ERROR: No nexus-* directory found after extraction!" && \
+      echo "=== Full directory tree ===" && \
+      find ${SONATYPE_DIR} -type d && \
+      exit 1; \
     fi && \
-    rm /tmp/nexus.tar.gz
+    rm /tmp/nexus.tar.gz && \
+    # Verify expected structure exists
+    echo "=== Verifying Nexus directory structure ===" && \
+    echo "Contents of ${NEXUS_HOME}:" && \
+    ls -la ${NEXUS_HOME}/ && \
+    echo "Contents of ${NEXUS_HOME}/bin (if exists):" && \
+    ls -la ${NEXUS_HOME}/bin/ 2>/dev/null || echo "WARNING: bin directory not found!"
 
-# Configure Nexus to use the data directory
-RUN sed -i "s|karaf.data=.*|karaf.data=${NEXUS_DATA}|g" ${NEXUS_HOME}/bin/nexus.vmoptions && \
-    sed -i "s|java-library-path=.*|java-library-path=./lib/support|g" ${NEXUS_HOME}/bin/nexus.vmoptions
+# Verify and configure Nexus vmoptions
+RUN VMOPTIONS_FILE="${NEXUS_HOME}/bin/nexus.vmoptions" && \
+    if [ ! -f "$VMOPTIONS_FILE" ]; then \
+      echo "========================================" && \
+      echo "ERROR: nexus.vmoptions not found at expected path:" && \
+      echo "  $VMOPTIONS_FILE" && \
+      echo "========================================" && \
+      echo "Actual directory structure:" && \
+      echo "--- ${NEXUS_HOME} ---" && \
+      ls -la ${NEXUS_HOME}/ && \
+      echo "--- Looking for .vmoptions files ---" && \
+      find ${NEXUS_HOME} -name "*.vmoptions" -type f 2>/dev/null && \
+      echo "--- Looking for bin directories ---" && \
+      find ${NEXUS_HOME} -type d -name "bin" 2>/dev/null && \
+      echo "========================================" && \
+      echo "Please check the structure of your nexus-*.tar.gz file." && \
+      echo "Expected: nexus-<version>/bin/nexus.vmoptions" && \
+      echo "========================================" && \
+      exit 1; \
+    fi && \
+    echo "Found nexus.vmoptions at: $VMOPTIONS_FILE" && \
+    sed -i "s|karaf.data=.*|karaf.data=${NEXUS_DATA}|g" "$VMOPTIONS_FILE" && \
+    sed -i "s|java-library-path=.*|java-library-path=./lib/support|g" "$VMOPTIONS_FILE"
 
 # Create necessary directories in NEXUS_DATA
 RUN mkdir -p ${NEXUS_DATA}/etc ${NEXUS_DATA}/log ${NEXUS_DATA}/tmp && \
