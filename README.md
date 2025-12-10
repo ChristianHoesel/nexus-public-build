@@ -8,7 +8,7 @@ The official Nexus Public Repository has some challenges:
 - A separate branch is created for each version (e.g., `release-3.86.0-08`)
 - The `main` branch is only sporadically updated (last update: February 2025)
 - Releases are maintained as separate branches and tags, not as continuous development in the main branch
-- The build requires a specific setup (Java 17, Yarn 1.22 & Maven profile "public")
+- The build requires a specific setup (Java 21, Yarn 1.22 & Maven profile "public")
 - Build documentation is incomplete and requires knowledge of Maven profiles
 
 ## Solution
@@ -37,7 +37,7 @@ For detailed Docker usage, configuration, and troubleshooting, see [DOCKER.md](D
 1. Go to the "Actions" tab in this repository
 2. Select the workflow "Build Nexus OSS"
 3. Click on "Run workflow"
-4. Enter the desired Nexus version (e.g., `release-3.86.0-08`)
+4. Enter the desired Nexus version (e.g., `release-3.87.1-01`)
 5. Built artifacts can be found under "Artifacts" after the build completes
 
 ### Available Versions
@@ -46,9 +46,9 @@ Find Nexus versions here:
 - **Branches**: https://github.com/sonatype/nexus-public/branches/all
 - **Releases/Tags**: https://github.com/sonatype/nexus-public/releases
 
-Current examples (as of November 2025):
-- `release-3.86.0-08` (latest)
-- `release-3.85.0-03`  
+Current examples (as of December 2025):
+- `release-3.87.1-01` (latest)
+- `release-3.86.0-08`  
 
 
 **Note**: Branch names correspond to release tags. Use the branch name for the build.
@@ -60,7 +60,7 @@ If you want to build locally:
 ```bash
 # Simply use the build script
 chmod +x build-local.sh
-./build-local.sh release-3.86.0-08
+./build-local.sh release-3.87.1-01
 ```
 
 The build script automatically performs the following steps:
@@ -78,7 +78,7 @@ The finished artifacts can then be found in the workspace root:
 
 ## Build Requirements
 
-- **Java**: OpenJDK 17 (Temurin recommended)
+- **Java**: OpenJDK 21 (Temurin recommended)
 - **Node.js**: Version 18 or higher
 - **Corepack**: For Yarn 4 (activate with `corepack enable`)
 - **Yarn**: Version 4.9.1 for frontend build, version 1.22.22 for Maven (automatically managed by build script)
@@ -134,7 +134,7 @@ Docker images are automatically built and published to the GitHub Container Regi
 docker pull ghcr.io/christianhoesel/nexus-public-build:latest
 
 # Pull specific version
-docker pull ghcr.io/christianhoesel/nexus-public-build:3.86.0-08
+docker pull ghcr.io/christianhoesel/nexus-public-build:3.87.1-01
 ```
 
 See [DOCKER.md](DOCKER.md) for complete Docker usage documentation.

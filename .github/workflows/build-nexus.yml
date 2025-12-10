@@ -4,10 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       nexus_version:
-        description: 'Nexus version/branch to build (e.g., release-3.86.0-08)'
+        description: 'Nexus version/branch to build (e.g., release-3.87.1-01)'
         required: true
-        default: 'release-3.86.0-08'
+        default: 'release-3.87.1-01'
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
   # schedule:
@@ -15,7 +18,7 @@ on:
     # - cron: '0 2 * * 1'
 
 env:
-  JAVA_VERSION: '17'
+  JAVA_VERSION: '21'
 
 jobs:
   build:
@@ -29,15 +32,15 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: sonatype/nexus-public
-          ref: ${{ github.event.inputs.nexus_version || 'release-3.86.0-08' }}
+          ref: ${{ github.event.inputs.nexus_version || 'release-3.87.1-01' }}
           path: nexus-public
           fetch-depth: 1
 
-      - name: Set up Java 17
+      - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '21'
           cache: 'maven'
 
       - name: Setup Node.js

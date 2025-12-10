@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre-jammy
+FROM eclipse-temurin:21-jre-jammy
 
 # Set Nexus version as build argument (passed from CI build)
 ARG NEXUS_VERSION

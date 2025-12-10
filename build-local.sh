@@ -4,7 +4,7 @@ set -e
 # Local build script for Nexus OSS
 # Usage: ./build-local.sh [version]
 
-VERSION=${1:-"release-3.86.0-08"}
+VERSION=${1:-"release-3.87.1-01"}
 NEXUS_DIR="nexus-public"
 PROJECT_VERSION=""
 
@@ -22,7 +22,7 @@ check_requirements() {
     
     # Check Java version
     if ! command -v java &> /dev/null; then
-        echo "❌ Java not found. Please install Java 17."
+        echo "❌ Java not found. Please install Java 21."
         exit 1
     fi
     
@@ -33,15 +33,15 @@ check_requirements() {
     fi
     
     JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d'.' -f1)
-    if [ "$JAVA_VERSION" != "17" ]; then
-        echo "⚠️  Warning: Java $JAVA_VERSION found, but Java 17 is recommended."
+    if [ "$JAVA_VERSION" != "21" ]; then
+        echo "⚠️  Warning: Java $JAVA_VERSION found, but Java 21 is recommended."
         read -p "Continue anyway? (y/n) " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
             exit 1
         fi
     else
-        echo "✅ Java 17 found"
+        echo "✅ Java 21 found"
     fi
     
     # Check Node.js
