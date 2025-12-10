@@ -4,7 +4,7 @@ This dev container provides a complete build environment for Sonatype Nexus Repo
 
 ## Included Tools
 
-- **Java 17** (OpenJDK via Microsoft Dev Container)
+- **Java 21** (OpenJDK via Microsoft Dev Container)
 - **Node.js 18**
 - **Yarn 1.22.22** (installed globally)
 - **Maven** (via Maven Wrapper in Nexus project)

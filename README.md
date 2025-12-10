@@ -8,7 +8,7 @@ The official Nexus Public Repository has some challenges:
 - A separate branch is created for each version (e.g., `release-3.86.0-08`)
 - The `main` branch is only sporadically updated (last update: February 2025)
 - Releases are maintained as separate branches and tags, not as continuous development in the main branch
-- The build requires a specific setup (Java 17, Yarn 1.22 & Maven profile "public")
+- The build requires a specific setup (Java 21, Yarn 1.22 & Maven profile "public")
 - Build documentation is incomplete and requires knowledge of Maven profiles
 
 ## Solution
@@ -78,7 +78,7 @@ The finished artifacts can then be found in the workspace root:
 
 ## Build Requirements
 
-- **Java**: OpenJDK 17 (Temurin recommended)
+- **Java**: OpenJDK 21 (Temurin recommended)
 - **Node.js**: Version 18 or higher
 - **Corepack**: For Yarn 4 (activate with `corepack enable`)
 - **Yarn**: Version 4.9.1 for frontend build, version 1.22.22 for Maven (automatically managed by build script)
