@@ -10,6 +10,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
   # schedule:
     # Weekly build every Monday at 2 AM UTC
     # - cron: '0 2 * * 1'
