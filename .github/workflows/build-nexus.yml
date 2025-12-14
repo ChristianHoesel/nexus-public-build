@@ -175,7 +175,6 @@ jobs:
   build-docker:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     permissions:
       contents: read
       packages: write
@@ -229,10 +228,14 @@ jobs:
             type=sha,prefix={{branch}}-
 
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
+          # Only push on push to main or workflow_dispatch, not on pull requests  
+          push: ${{ github.event_name != 'pull_request' }}
+          # Load locally on pull requests for testing
+          load: ${{ github.event_name == 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
@@ -240,13 +243,28 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Export Docker image for testing
+        if: github.event_name == 'pull_request'
+        run: |
+          # Save the first tag for testing
+          IMAGE_TAG=$(echo "${{ steps.meta.outputs.tags }}" | head -n 1)
+          echo "Saving image: $IMAGE_TAG"
+          docker save "$IMAGE_TAG" -o /tmp/nexus-image.tar
+          
+      - name: Upload Docker image artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-image-${{ github.run_id }}
+          path: /tmp/nexus-image.tar
+          retention-days: 1
+
       - name: Image digest
         run: echo "Docker image pushed successfully with tags ${{ steps.meta.outputs.tags }}"
 
   test-docker:
     needs: build-docker
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     permissions:
       contents: read
       packages: read
@@ -255,21 +273,36 @@ jobs:
       - name: Checkout this repository
         uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
+      - name: Download Docker image artifact (for PRs)
+        if: github.event_name == 'pull_request'
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image-${{ github.run_id }}
+          path: /tmp
+
+      - name: Load Docker image (for PRs)
+        if: github.event_name == 'pull_request'
+        run: |
+          docker load -i /tmp/nexus-image.tar
+          # Set IMAGE_NAME to the first tag
+          echo "IMAGE_NAME=$(docker images --format '{{.Repository}}:{{.Tag}}' | grep nexus-public-build | head -n 1)" >> $GITHUB_ENV
+
+      - name: Log in to GitHub Container Registry (for push/dispatch)
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull Docker image
+      - name: Pull Docker image (for push/dispatch)
+        if: github.event_name != 'pull_request'
         run: |
           # Pull the latest image that was just built
           docker pull ghcr.io/${{ github.repository }}:latest
+          echo "IMAGE_NAME=ghcr.io/${{ github.repository }}:latest" >> $GITHUB_ENV
 
       - name: Run Docker image tests
-        env:
-          IMAGE_NAME: ghcr.io/${{ github.repository }}:latest
         run: |
           chmod +x test-docker-image.sh
           ./test-docker-image.sh
