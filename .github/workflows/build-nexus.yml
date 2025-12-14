@@ -232,15 +232,27 @@ jobs:
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
             type=sha,prefix={{branch}}-
 
-      - name: Build and push Docker image
-        id: build
+      - name: Build and push Docker image (for tag builds)
+        if: github.ref_type == 'tag'
+        id: build-push
         uses: docker/build-push-action@v5
         with:
           context: .
-          # Only push when triggered by a git tag
-          push: ${{ github.ref_type == 'tag' }}
-          # Load locally for all other builds (for testing)
-          load: ${{ github.ref_type != 'tag' }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            NEXUS_VERSION=${{ steps.version.outputs.version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build Docker image (for non-tag builds)
+        if: github.ref_type != 'tag'
+        id: build-load
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
@@ -256,14 +268,14 @@ jobs:
           echo "tag=${IMAGE_TAG}" >> $GITHUB_OUTPUT
           echo "Using image tag: ${IMAGE_TAG}"
 
-      - name: Export Docker image for testing
+      - name: Export Docker image for testing (for non-tag builds)
         if: github.ref_type != 'tag'
         run: |
           # Save the image with the determined tag
           docker save "${{ steps.set-tag.outputs.tag }}" -o /tmp/nexus-image.tar
           echo "Saved image: ${{ steps.set-tag.outputs.tag }}"
-
-      - name: Upload Docker image artifact
+          
+      - name: Upload Docker image artifact (for non-tag builds)
         if: github.ref_type != 'tag'
         uses: actions/upload-artifact@v4
         with:
