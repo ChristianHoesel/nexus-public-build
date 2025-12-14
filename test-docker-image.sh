@@ -13,8 +13,8 @@ NC='\033[0m' # No Color
 # Configuration
 IMAGE_NAME="${IMAGE_NAME:-ghcr.io/christianhoesel/nexus-public-build:latest}"
 CONTAINER_NAME="nexus-test-$$"
-# Use random available port in CI to avoid conflicts
-TEST_PORT="${TEST_PORT:-$(shuf -i 8081-8999 -n 1)}"
+# Use random available port in higher range to avoid conflicts with system services
+TEST_PORT="${TEST_PORT:-$(shuf -i 30000-39999 -n 1)}"
 HEALTH_CHECK_TIMEOUT=300  # 5 minutes
 HEALTH_CHECK_INTERVAL=10  # 10 seconds
 
@@ -169,6 +169,7 @@ fi
 echo ""
 echo "Test 10: Testing health check endpoint..."
 HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:${TEST_PORT}/" 2>/dev/null || echo "000")
+# Accept 200 (OK) or 303 (See Other - Nexus redirects to setup/login page)
 if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "303" ]; then
     test_pass "Health check successful (HTTP $HTTP_CODE)"
 else
@@ -180,6 +181,7 @@ echo ""
 echo "Test 11: Checking Docker health status..."
 sleep 5  # Give health check time to run
 HEALTH_STATUS=$(docker inspect "$CONTAINER_NAME" --format='{{.State.Health.Status}}' 2>/dev/null || echo "none")
+# Accept 'healthy' or 'none' (when no health check is configured in the image)
 if [ "$HEALTH_STATUS" = "healthy" ] || [ "$HEALTH_STATUS" = "none" ]; then
     test_pass "Docker health status: $HEALTH_STATUS"
 else
@@ -199,6 +201,7 @@ fi
 # Test 13: Check if admin.password file is created
 echo ""
 echo "Test 13: Checking for admin.password file..."
+# Note: This file is created after first startup, may not exist immediately
 if docker exec "$CONTAINER_NAME" test -f /nexus-data/admin.password; then
     test_pass "Admin password file created"
     # Don't show the actual password for security

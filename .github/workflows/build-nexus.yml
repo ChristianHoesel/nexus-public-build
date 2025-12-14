@@ -279,7 +279,11 @@ jobs:
         run: |
           echo "=== Container logs ==="
           # Find and show logs for any nexus-test-* containers
-          docker ps -a --filter "name=nexus-test-" --format "{{.Names}}" | while read container; do
-            echo "Logs for $container:"
-            docker logs "$container" 2>&1 || echo "Could not retrieve logs"
-          done
+          if docker ps -a --filter "name=nexus-test-" --format "{{.Names}}" | grep -q .; then
+            docker ps -a --filter "name=nexus-test-" --format "{{.Names}}" | while read container; do
+              echo "Logs for $container:"
+              docker logs "$container" 2>&1 || echo "Could not retrieve logs"
+            done
+          else
+            echo "No test containers found"
+          fi
