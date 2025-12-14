@@ -246,7 +246,7 @@ jobs:
   test-docker:
     needs: build-docker
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'pull_request'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
     permissions:
       contents: read
       packages: read
@@ -278,4 +278,8 @@ jobs:
         if: failure()
         run: |
           echo "=== Container logs ==="
-          docker logs nexus-test-$$ 2>&1 || echo "No container logs available"
+          # Find and show logs for any nexus-test-* containers
+          docker ps -a --filter "name=nexus-test-" --format "{{.Names}}" | while read container; do
+            echo "Logs for $container:"
+            docker logs "$container" 2>&1 || echo "Could not retrieve logs"
+          done

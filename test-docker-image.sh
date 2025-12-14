@@ -13,7 +13,8 @@ NC='\033[0m' # No Color
 # Configuration
 IMAGE_NAME="${IMAGE_NAME:-ghcr.io/christianhoesel/nexus-public-build:latest}"
 CONTAINER_NAME="nexus-test-$$"
-TEST_PORT="${TEST_PORT:-8081}"
+# Use random available port in CI to avoid conflicts
+TEST_PORT="${TEST_PORT:-$(shuf -i 8081-8999 -n 1)}"
 HEALTH_CHECK_TIMEOUT=300  # 5 minutes
 HEALTH_CHECK_INTERVAL=10  # 10 seconds
 
