@@ -291,6 +291,62 @@ docker build -t nexus-oss:custom .
 docker run -d -p 8081:8081 -v nexus-data:/nexus-data nexus-oss:custom
 ```
 
+## Testing the Docker Image
+
+This repository includes a comprehensive test suite to validate Docker image functionality.
+
+### Automated Testing
+
+The test script `test-docker-image.sh` performs the following checks:
+
+1. **Image Validation**
+   - Verifies Docker image exists
+   - Checks image metadata and labels
+
+2. **Container Runtime Tests**
+   - Container starts successfully
+   - Running as correct user (nexus)
+   - Environment variables configured correctly
+
+3. **Nexus Service Tests**
+   - Service starts within timeout period
+   - Nexus is accessible on port 8081
+   - Health check endpoint responds correctly
+
+4. **Data Persistence Tests**
+   - Volume mounts working correctly
+   - Data directory is writable
+   - Files persist correctly
+
+5. **Security Tests**
+   - Correct file permissions
+   - User privileges configured properly
+
+### Running Tests Locally
+
+To test a Docker image locally:
+
+```bash
+# Test the latest image
+chmod +x test-docker-image.sh
+IMAGE_NAME=ghcr.io/christianhoesel/nexus-public-build:latest ./test-docker-image.sh
+
+# Test a specific version
+IMAGE_NAME=ghcr.io/christianhoesel/nexus-public-build:3.87.1-01 ./test-docker-image.sh
+
+# Test a locally built image
+IMAGE_NAME=nexus-oss:custom ./test-docker-image.sh
+```
+
+### CI/CD Integration
+
+Tests automatically run in GitHub Actions after each Docker image build:
+- On every push to main branch
+- On every pull request
+- On manual workflow dispatch
+
+Failed tests will prevent the workflow from completing successfully, ensuring only validated images are available.
+
 ## Security Considerations
 
 1. **Change default password**: Always change the default admin password immediately after first login

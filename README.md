@@ -139,6 +139,24 @@ docker pull ghcr.io/christianhoesel/nexus-public-build:3.87.1-01
 
 See [DOCKER.md](DOCKER.md) for complete Docker usage documentation.
 
+### Docker Image Testing
+
+Automated tests verify the functionality of Docker images:
+- **Test Script**: `test-docker-image.sh` - Comprehensive test suite for Docker images
+- **GitHub Actions**: Tests run automatically after each Docker image build
+- **Test Coverage**:
+  - Container startup and health checks
+  - Nexus service accessibility
+  - Volume persistence
+  - Environment variable configuration
+  - User permissions and security
+
+To run tests locally:
+```bash
+chmod +x test-docker-image.sh
+IMAGE_NAME=ghcr.io/christianhoesel/nexus-public-build:latest ./test-docker-image.sh
+```
+
 ### Maven Profile "public"
 
 The Maven profile `-Ppublic` is **required** for the OSS build. It activates the necessary modules and configurations for the public version of Nexus Repository.
