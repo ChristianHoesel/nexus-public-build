@@ -233,7 +233,7 @@ jobs:
   integration-test:
     needs: build
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push' || github.event_name == 'pull_request'
     permissions:
       contents: read
 
@@ -284,12 +284,26 @@ jobs:
       - name: Start Nexus
         run: |
           NEXUS_DIR="${{ steps.extract.outputs.nexus_dir }}"
+          WORK_DIR="$(pwd)"
           
-          # Create data directory
-          mkdir -p nexus-data
-          export NEXUS_DATA="$(pwd)/nexus-data"
+          # Create proper directory structure (matching official Nexus setup)
+          mkdir -p sonatype-work/nexus3
+          
+          # Set Nexus environment variables
+          export NEXUS_DATA="${WORK_DIR}/sonatype-work/nexus3"
+          export SONATYPE_WORK="${WORK_DIR}/sonatype-work"
+          
+          # Create required subdirectories in NEXUS_DATA
+          mkdir -p "${NEXUS_DATA}/etc" "${NEXUS_DATA}/log" "${NEXUS_DATA}/tmp"
+          
+          # Set INSTALL4J_ADD_VM_PARAMS for JVM configuration
+          export INSTALL4J_ADD_VM_PARAMS="-Xms1g -Xmx1g -XX:MaxDirectMemorySize=1g -Djava.util.prefs.userRoot=${NEXUS_DATA}/javaprefs"
           
           echo "Starting Nexus in background..."
+          echo "NEXUS_DIR: $NEXUS_DIR"
+          echo "NEXUS_DATA: $NEXUS_DATA"
+          echo "SONATYPE_WORK: $SONATYPE_WORK"
+          
           nohup "$NEXUS_DIR/bin/nexus" run > nexus.log 2>&1 &
           NEXUS_PID=$!
           echo "Nexus PID: $NEXUS_PID"
