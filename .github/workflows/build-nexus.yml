@@ -172,6 +172,200 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  deploy-artifacts:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout this repository
+        uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nexus-oss-build-${{ github.event.inputs.nexus_version || 'latest' }}
+          path: ./artifacts
+
+      - name: Extract Nexus version from artifact
+        id: version
+        run: |
+          # Find the tar.gz file and extract version from filename
+          TARBALL=$(find ./artifacts -name "nexus-*-unix.tar.gz" | head -n 1)
+          if [ -z "$TARBALL" ]; then
+            echo "No Nexus tarball found!"
+            exit 1
+          fi
+
+          # Extract version from filename (e.g., nexus-3.86.0-08-unix.tar.gz -> 3.86.0-08)
+          VERSION=$(basename "$TARBALL" | sed 's/nexus-\(.*\)-unix\.tar\.gz/\1/')
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "Detected Nexus version: ${VERSION}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Nexus Repository OSS ${{ steps.version.outputs.version }}
+          body: |
+            Nexus Repository OSS build version ${{ steps.version.outputs.version }}
+            
+            Built from: ${{ github.event.inputs.nexus_version || 'latest' }}
+            
+            ## Artifacts
+            - `nexus-${{ steps.version.outputs.version }}-unix.tar.gz` - Linux/Unix distribution
+            - `nexus-${{ steps.version.outputs.version }}.zip` - Windows distribution
+            
+            ## Docker Image
+            ```bash
+            docker pull ghcr.io/${{ github.repository }}:${{ steps.version.outputs.version }}
+            ```
+          files: |
+            artifacts/**/nexus-*.tar.gz
+            artifacts/**/nexus-*.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  integration-test:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'push'
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nexus-oss-build-${{ github.event.inputs.nexus_version || 'latest' }}
+          path: ./artifacts
+
+      - name: Extract and prepare Nexus
+        id: extract
+        run: |
+          # Find the tar.gz file
+          TARBALL=$(find ./artifacts -name "nexus-*-unix.tar.gz" | head -n 1)
+          if [ -z "$TARBALL" ]; then
+            echo "No Nexus tarball found!"
+            exit 1
+          fi
+          
+          echo "Found tarball: $TARBALL"
+          
+          # Extract the tarball
+          tar -xzf "$TARBALL" -C ./
+          
+          # Find the extracted directory
+          NEXUS_DIR=$(find . -maxdepth 1 -type d -name "nexus-*" | head -n 1)
+          if [ -z "$NEXUS_DIR" ]; then
+            echo "No extracted Nexus directory found!"
+            exit 1
+          fi
+          
+          echo "nexus_dir=${NEXUS_DIR}" >> $GITHUB_OUTPUT
+          echo "Extracted to: $NEXUS_DIR"
+          
+          # Verify structure
+          ls -la "$NEXUS_DIR/"
+          
+          # Ensure bin scripts are executable
+          chmod +x "$NEXUS_DIR/bin"/*
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Start Nexus
+        run: |
+          NEXUS_DIR="${{ steps.extract.outputs.nexus_dir }}"
+          
+          # Create data directory
+          mkdir -p nexus-data
+          export NEXUS_DATA="$(pwd)/nexus-data"
+          
+          echo "Starting Nexus in background..."
+          nohup "$NEXUS_DIR/bin/nexus" run > nexus.log 2>&1 &
+          NEXUS_PID=$!
+          echo "Nexus PID: $NEXUS_PID"
+          
+          # Save PID for cleanup
+          echo $NEXUS_PID > nexus.pid
+
+      - name: Wait for Nexus to start
+        run: |
+          echo "Waiting for Nexus to be ready on port 8081..."
+          
+          # Wait up to 5 minutes for Nexus to start
+          MAX_WAIT=300
+          ELAPSED=0
+          
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            # First check if port is open
+            if curl -f -s http://localhost:8081/ > /dev/null 2>&1; then
+              echo "✅ Nexus is responding on port 8081!"
+              # Try to get status endpoint if available
+              if curl -f -s http://localhost:8081/service/rest/v1/status > /dev/null 2>&1; then
+                echo "✅ Nexus status endpoint is available!"
+                curl -s http://localhost:8081/service/rest/v1/status
+              fi
+              curl -s http://localhost:8081/ | head -20
+              exit 0
+            fi
+            
+            echo "Waiting for Nexus to start... ($ELAPSED seconds)"
+            sleep 10
+            ELAPSED=$((ELAPSED + 10))
+            
+            # Show last few lines of log for debugging
+            if [ -f nexus.log ]; then
+              echo "Last 10 lines of nexus.log:"
+              tail -10 nexus.log
+            fi
+          done
+          
+          echo "❌ Nexus did not start within $MAX_WAIT seconds"
+          echo "Full log:"
+          cat nexus.log
+          exit 1
+
+      - name: Cleanup
+        if: always()
+        run: |
+          if [ -f nexus.pid ]; then
+            NEXUS_PID=$(cat nexus.pid)
+            if kill -0 $NEXUS_PID 2>/dev/null; then
+              echo "Stopping Nexus (PID: $NEXUS_PID)..."
+              kill $NEXUS_PID || true
+              
+              # Wait up to 15 seconds for graceful shutdown
+              for i in {1..15}; do
+                if ! kill -0 $NEXUS_PID 2>/dev/null; then
+                  echo "Nexus stopped gracefully"
+                  break
+                fi
+                sleep 1
+              done
+              
+              # Force kill if still running
+              if kill -0 $NEXUS_PID 2>/dev/null; then
+                echo "Forcing Nexus to stop..."
+                kill -9 $NEXUS_PID 2>/dev/null || true
+              fi
+            fi
+          fi
+          
+          # Show final log for debugging
+          if [ -f nexus.log ]; then
+            echo "Final Nexus log:"
+            cat nexus.log
+          fi
+
   build-docker:
     needs: build
     runs-on: ubuntu-latest
