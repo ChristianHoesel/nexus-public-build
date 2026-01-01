@@ -296,8 +296,15 @@ jobs:
           # Create required subdirectories in NEXUS_DATA
           mkdir -p "${NEXUS_DATA}/etc" "${NEXUS_DATA}/log" "${NEXUS_DATA}/tmp"
           
+          # Create nexus.properties to set edition as string (workaround for CoreNexusEdition conversion issue)
+          cat > "${NEXUS_DATA}/etc/nexus.properties" << 'EOF'
+# Workaround for Spring Boot CoreNexusEdition to String conversion issue
+nexus.edition=CORE
+EOF
+          
           # Set INSTALL4J_ADD_VM_PARAMS for JVM configuration
-          export INSTALL4J_ADD_VM_PARAMS="-Xms1g -Xmx1g -XX:MaxDirectMemorySize=1g -Djava.util.prefs.userRoot=${NEXUS_DATA}/javaprefs"
+          # Add -Dnexus.edition=CORE to help Spring Boot property conversion
+          export INSTALL4J_ADD_VM_PARAMS="-Xms1g -Xmx1g -XX:MaxDirectMemorySize=1g -Djava.util.prefs.userRoot=${NEXUS_DATA}/javaprefs -Dnexus.edition=CORE"
           
           echo "Starting Nexus in background..."
           echo "NEXUS_DIR: $NEXUS_DIR"
