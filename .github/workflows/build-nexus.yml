@@ -300,8 +300,8 @@ jobs:
           
           # Create nexus.properties to set edition as string (workaround for CoreNexusEdition conversion issue)
           cat > "${NEXUS_DATA}/etc/nexus.properties" << 'EOF'
-nexus.edition=CORE
-EOF
+          nexus.edition=CORE
+          EOF
           
           # Set INSTALL4J_ADD_VM_PARAMS for JVM configuration
           # Memory settings: 1GB heap and 1GB direct memory (adequate for integration test)
