@@ -167,6 +167,18 @@ package_distribution() {
     local target_dir="$NEXUS_DIR/assemblies/nexus-repository-core/target"
     local base_name="nexus-${PROJECT_VERSION}"
 
+    # Create etc directory if it doesn't exist and add default nexus.properties with nexus.edition=CORE
+    mkdir -p "$assembly_dir/etc"
+    cat > "$assembly_dir/etc/nexus.properties" << 'EOF'
+# Default Nexus properties
+# This file sets default configuration values for Nexus Repository
+# You can override these settings by creating a nexus.properties file
+# in your NEXUS_DATA/etc directory (e.g., /nexus-data/etc/nexus.properties)
+
+# Set the Nexus edition to CORE (required for OSS version)
+nexus.edition=CORE
+EOF
+
     echo "  • Creating ${base_name}-unix.tar.gz"
     tar -czf "$target_dir/${base_name}-unix.tar.gz" -C "$assembly_dir" .
 

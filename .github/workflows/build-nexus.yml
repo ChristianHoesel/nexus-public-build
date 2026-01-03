@@ -124,6 +124,18 @@ jobs:
           # copy the assembly contents into the named top-level folder
           cp -a assembly/. "$STAGING_DIR"/
 
+          # Create etc directory if it doesn't exist and add default nexus.properties with nexus.edition=CORE
+          mkdir -p "$STAGING_DIR/etc"
+          cat > "$STAGING_DIR/etc/nexus.properties" << 'EOF'
+          # Default Nexus properties
+          # This file sets default configuration values for Nexus Repository
+          # You can override these settings by creating a nexus.properties file
+          # in your NEXUS_DATA/etc directory (e.g., /nexus-data/etc/nexus.properties)
+          
+          # Set the Nexus edition to CORE (required for OSS version)
+          nexus.edition=CORE
+          EOF
+
           # Ensure correct Unix permissions before creating tarball
           # - directories and files readable, directories executable
           chmod -R u+rwX,go+rX "$STAGING_DIR"
