@@ -179,6 +179,25 @@ package_distribution() {
 nexus.edition=CORE
 EOF
 
+    # Create bin directory if it doesn't exist and add nexus-env.sh to set INSTALL4J_ADD_VM_PARAMS
+    mkdir -p "$assembly_dir/bin"
+    cat > "$assembly_dir/bin/nexus-env.sh" << 'EOF'
+#!/bin/bash
+# Nexus environment configuration
+# This script sets the INSTALL4J_ADD_VM_PARAMS environment variable with default values
+# Source this script before starting Nexus or add it to your shell profile
+# You can also set INSTALL4J_ADD_VM_PARAMS manually to override these defaults
+
+# Only set if not already defined
+if [ -z "$INSTALL4J_ADD_VM_PARAMS" ]; then
+  export INSTALL4J_ADD_VM_PARAMS="-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=${NEXUS_DATA:-./sonatype-work/nexus3}/javaprefs -Dnexus.edition=CORE"
+  echo "INSTALL4J_ADD_VM_PARAMS set to: $INSTALL4J_ADD_VM_PARAMS"
+else
+  echo "INSTALL4J_ADD_VM_PARAMS already set to: $INSTALL4J_ADD_VM_PARAMS"
+fi
+EOF
+    chmod +x "$assembly_dir/bin/nexus-env.sh"
+
     echo "  • Creating ${base_name}-unix.tar.gz"
     tar -czf "$target_dir/${base_name}-unix.tar.gz" -C "$assembly_dir" .
 
