@@ -9,7 +9,7 @@ services:
       - nexus-data:/nexus-data
     environment:
       # JVM Settings
-      - INSTALL4J_ADD_VM_PARAMS=-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-data/javaprefs
+      - INSTALL4J_ADD_VM_PARAMS=-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/nexus-data/javaprefs -Dnexus.edition=CORE
       # Nexus Context Path (leave empty for root or set to /nexus for /nexus path)
       - NEXUS_CONTEXT=
     healthcheck:

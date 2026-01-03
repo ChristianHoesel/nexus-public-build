@@ -76,6 +76,34 @@ The finished artifacts can then be found in the workspace root:
 - `nexus-*-unix.tar.gz` (~133 MB)
 - `nexus-*-unix.zip`
 
+### Running Nexus from Artifacts
+
+After extracting the tarball or zip, you can run Nexus with:
+
+```bash
+# Extract the archive
+tar -xzf nexus-*-unix.tar.gz
+cd nexus-*/
+
+# Set environment variables (required)
+source bin/nexus-env.sh
+
+# Start Nexus
+bin/nexus run
+```
+
+The `nexus-env.sh` script sets the required `INSTALL4J_ADD_VM_PARAMS` environment variable with:
+- Memory settings (2.7GB heap and direct memory by default)
+- Java preferences location
+- Nexus edition set to CORE
+
+You can also set `INSTALL4J_ADD_VM_PARAMS` manually if you want to customize memory settings:
+
+```bash
+export INSTALL4J_ADD_VM_PARAMS="-Xms4g -Xmx4g -XX:MaxDirectMemorySize=4g -Djava.util.prefs.userRoot=${NEXUS_DATA:-./sonatype-work/nexus3}/javaprefs -Dnexus.edition=CORE"
+bin/nexus run
+```
+
 ## Build Requirements
 
 - **Java**: OpenJDK 21 (Temurin recommended)

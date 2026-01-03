@@ -15,7 +15,8 @@ ENV NEXUS_HOME=${SONATYPE_DIR}/nexus \
 # See: https://help.sonatype.com/en/configuring-the-runtime-environment.html
 # Note: Nexus expects data in ${SONATYPE_WORK}/nexus3, we symlink it to ${NEXUS_DATA}
 ENV INSTALL4J_ADD_VM_PARAMS="-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m \
-    -Djava.util.prefs.userRoot=${NEXUS_DATA}/javaprefs"
+    -Djava.util.prefs.userRoot=${NEXUS_DATA}/javaprefs \
+    -Dnexus.edition=CORE"
 
 # Configure Java environment
 ENV JAVA_HOME=/opt/java/openjdk \
