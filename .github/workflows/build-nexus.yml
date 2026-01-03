@@ -131,7 +131,7 @@ jobs:
           # This file sets default configuration values for Nexus Repository
           # You can override these settings by creating a nexus.properties file
           # in your NEXUS_DATA/etc directory (e.g., /nexus-data/etc/nexus.properties)
-          
+
           # Set the Nexus edition to CORE (required for OSS version)
           nexus.edition=CORE
           EOF
