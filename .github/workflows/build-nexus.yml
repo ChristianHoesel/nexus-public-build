@@ -147,7 +147,7 @@ jobs:
 
 # Only set if not already defined
 if [ -z "$INSTALL4J_ADD_VM_PARAMS" ]; then
-  export INSTALL4J_ADD_VM_PARAMS="-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=\${NEXUS_DATA:-./sonatype-work/nexus3}/javaprefs -Dnexus.edition=CORE"
+  export INSTALL4J_ADD_VM_PARAMS="-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=${NEXUS_DATA:-./sonatype-work/nexus3}/javaprefs -Dnexus.edition=CORE"
   echo "INSTALL4J_ADD_VM_PARAMS set to: $INSTALL4J_ADD_VM_PARAMS"
 else
   echo "INSTALL4J_ADD_VM_PARAMS already set to: $INSTALL4J_ADD_VM_PARAMS"
