@@ -119,12 +119,12 @@ environment:
 ## Available Tags
 
 - `latest`: Latest build from the main branch
-- `<version>`: Specific Nexus version (e.g., `3.87.1-01`)
+- `<version>`: Specific Nexus version (e.g., `3.88.0-08`)
 - `<branch>-<sha>`: Branch-specific builds with commit SHA
 
 Example:
 ```bash
-docker pull ghcr.io/christianhoesel/nexus-public-build:3.87.1-01
+docker pull ghcr.io/christianhoesel/nexus-public-build:3.88.0-08
 ```
 
 ## Health Check
@@ -276,7 +276,7 @@ If you want to build the Docker image yourself:
 
 ```bash
 # Build Nexus first
-./build-local.sh release-3.87.1-01
+./build-local.sh release-3.88.0-08
 
 # Find the built artifact
 TARBALL=$(find nexus-public -name "nexus-*.tar.gz" | head -n 1)
