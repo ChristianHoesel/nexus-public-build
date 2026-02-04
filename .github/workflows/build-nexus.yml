@@ -115,7 +115,7 @@ jobs:
           PROJECT_VERSION=$(grep '<version>' pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/' | sed -n '2p')
           echo "Packaging version: $PROJECT_VERSION"
 
-          cd assemblies/nexus-repository-core/target
+          cd public/selfhosted/assemblies/nexus-repository-core/target
 
           STAGING_DIR="nexus-${PROJECT_VERSION}"
           rm -rf "$STAGING_DIR"
