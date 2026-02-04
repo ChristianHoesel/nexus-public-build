@@ -39,7 +39,7 @@ On first start of the container:
 
 # Or manually
 cd nexus-public
-./mvnw clean install -Ppublic -DskipTests
+mvn clean install -Ppublic -DskipTests
 ```
 
 ### Testing GitHub Actions locally

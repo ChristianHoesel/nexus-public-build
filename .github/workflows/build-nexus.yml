@@ -104,7 +104,7 @@ jobs:
         run: |
           # Maven build with "public" profile
           # Frontend was already built with Yarn 4, Maven skips frontend steps
-          ./mvnw install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp -Dskip.installyarn -Dskip.yarn
+          mvn install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp -Dskip.installyarn -Dskip.yarn
         env:
           MAVEN_OPTS: "-Xmx4g -XX:+UseG1GC"
 
@@ -174,7 +174,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         working-directory: nexus-public
         run: |
-          ./mvnw verify -Ppublic
+          mvn verify -Ppublic
         continue-on-error: true
 
       - name: Find built artifacts

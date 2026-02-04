@@ -110,7 +110,7 @@ bin/nexus run
 - **Node.js**: Version 18 or higher
 - **Corepack**: For Yarn 4 (activate with `corepack enable`)
 - **Yarn**: Version 4.9.1 for frontend build, version 1.22.22 for Maven (automatically managed by build script)
-- **Maven**: Provided via Maven Wrapper (`./mvnw`)
+- **Maven**: Apache Maven 3.9+ (must be installed separately)
 - **RAM**: At least 4 GB for the build process
 - **Disk**: ~2 GB for dependencies and build artifacts
 
