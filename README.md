@@ -37,7 +37,7 @@ For detailed Docker usage, configuration, and troubleshooting, see [DOCKER.md](D
 1. Go to the "Actions" tab in this repository
 2. Select the workflow "Build Nexus OSS"
 3. Click on "Run workflow"
-4. Enter the desired Nexus version (e.g., `release-3.88.0-08`)
+4. Enter the desired Nexus version (e.g., `release-3.89.0-09`)
 5. Built artifacts can be found under "Artifacts" after the build completes
 
 ### Available Versions
@@ -46,9 +46,9 @@ Find Nexus versions here:
 - **Branches**: https://github.com/sonatype/nexus-public/branches/all
 - **Releases/Tags**: https://github.com/sonatype/nexus-public/releases
 
-Current examples (as of December 2025):
-- `release-3.88.0-08` (latest)
-- `release-3.87.1-01`  
+Current examples (as of February 2026):
+- `release-3.89.0-09` (latest)
+- `release-3.88.0-08`  
 
 
 **Note**: Branch names correspond to release tags. Use the branch name for the build.
@@ -60,7 +60,7 @@ If you want to build locally:
 ```bash
 # Simply use the build script
 chmod +x build-local.sh
-./build-local.sh release-3.88.0-08
+./build-local.sh release-3.89.0-09
 ```
 
 The build script automatically performs the following steps:
@@ -110,7 +110,7 @@ bin/nexus run
 - **Node.js**: Version 18 or higher
 - **Corepack**: For Yarn 4 (activate with `corepack enable`)
 - **Yarn**: Version 4.9.1 for frontend build, version 1.22.22 for Maven (automatically managed by build script)
-- **Maven**: Provided via Maven Wrapper (`./mvnw`)
+- **Maven**: Apache Maven 3.9+ (must be installed separately)
 - **RAM**: At least 4 GB for the build process
 - **Disk**: ~2 GB for dependencies and build artifacts
 
@@ -162,7 +162,7 @@ Docker images are automatically built and published to the GitHub Container Regi
 docker pull ghcr.io/christianhoesel/nexus-public-build:latest
 
 # Pull specific version
-docker pull ghcr.io/christianhoesel/nexus-public-build:3.88.0-08
+docker pull ghcr.io/christianhoesel/nexus-public-build:3.89.0-09
 ```
 
 See [DOCKER.md](DOCKER.md) for complete Docker usage documentation.

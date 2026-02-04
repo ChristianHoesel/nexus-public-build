@@ -1,6 +1,6 @@
 {
   "name": "Nexus Public Build Environment",
-  "image": "mcr.microsoft.com/devcontainers/java:1-21-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/java:21",
   
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
@@ -11,10 +11,6 @@
     },
     "ghcr.io/devcontainers/features/github-cli:1": {
       "version": "latest"
-    },
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {
-      "version": "latest",
-      "dockerDashComposeVersion": "v2"
     }
   },
 
@@ -46,9 +42,8 @@
   },
 
   "remoteEnv": {
-    "JAVA_HOME": "/usr/lib/jvm/msopenjdk-current",
-    "MAVEN_OPTS": "-Xmx4g -XX:+UseG1GC",
-    "PATH": "${containerEnv:PATH}"
+    "JAVA_HOME": "/usr/local/sdkman/candidates/java/current",
+    "MAVEN_OPTS": "-Xmx4g -XX:+UseG1GC"
   },
 
   "forwardPorts": [8081],

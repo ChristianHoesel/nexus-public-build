@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       nexus_version:
-        description: 'Nexus version/branch to build (e.g., release-3.88.0-08)'
+        description: 'Nexus version/branch to build (e.g., release-3.89.0-09)'
         required: true
-        default: 'release-3.88.0-08'
+        default: 'release-3.89.0-09'
   push:
     branches:
       - main
@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: sonatype/nexus-public
-          ref: ${{ github.event.inputs.nexus_version || 'release-3.88.0-08' }}
+          ref: ${{ github.event.inputs.nexus_version || 'release-3.89.0-09' }}
           path: nexus-public
           fetch-depth: 1
 
@@ -104,7 +104,7 @@ jobs:
         run: |
           # Maven build with "public" profile
           # Frontend was already built with Yarn 4, Maven skips frontend steps
-          ./mvnw install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp -Dskip.installyarn -Dskip.yarn
+          mvn install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp -Dskip.installyarn -Dskip.yarn
         env:
           MAVEN_OPTS: "-Xmx4g -XX:+UseG1GC"
 
@@ -115,7 +115,7 @@ jobs:
           PROJECT_VERSION=$(grep '<version>' pom.xml | sed 's/.*<version>\(.*\)<\/version>.*/\1/' | sed -n '2p')
           echo "Packaging version: $PROJECT_VERSION"
 
-          cd assemblies/nexus-repository-core/target
+          cd public/selfhosted/assemblies/nexus-repository-core/target
 
           STAGING_DIR="nexus-${PROJECT_VERSION}"
           rm -rf "$STAGING_DIR"
@@ -174,7 +174,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         working-directory: nexus-public
         run: |
-          ./mvnw verify -Ppublic
+          mvn verify -Ppublic
         continue-on-error: true
 
       - name: Find built artifacts

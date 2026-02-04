@@ -35,11 +35,11 @@ On first start of the container:
 ./build-local.sh
 
 # Build specific version
-./build-local.sh release-3.88.0-08
+./build-local.sh release-3.89.0-09
 
 # Or manually
 cd nexus-public
-./mvnw clean install -Ppublic -DskipTests
+mvn clean install -Ppublic -DskipTests
 ```
 
 ### Testing GitHub Actions locally
