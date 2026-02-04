@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       nexus_version:
-        description: 'Nexus version/branch to build (e.g., release-3.88.0-08)'
+        description: 'Nexus version/branch to build (e.g., release-3.89.0-09)'
         required: true
-        default: 'release-3.88.0-08'
+        default: 'release-3.89.0-09'
   push:
     branches:
       - main
@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: sonatype/nexus-public
-          ref: ${{ github.event.inputs.nexus_version || 'release-3.88.0-08' }}
+          ref: ${{ github.event.inputs.nexus_version || 'release-3.89.0-09' }}
           path: nexus-public
           fetch-depth: 1
 

@@ -4,7 +4,7 @@ set -e
 # Local build script for Nexus OSS
 # Usage: ./build-local.sh [version]
 
-VERSION=${1:-"release-3.88.0-08"}
+VERSION=${1:-"release-3.89.0-09"}
 NEXUS_DIR="nexus-public"
 PROJECT_VERSION=""
 
