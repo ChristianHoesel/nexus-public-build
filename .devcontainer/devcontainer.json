@@ -1,6 +1,6 @@
 {
   "name": "Nexus Public Build Environment",
-  "image": "mcr.microsoft.com/devcontainers/java:1-21-bullseye",
+  "image": "mcr.microsoft.com/devcontainers/java:21",
   
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
