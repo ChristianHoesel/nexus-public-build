@@ -4,7 +4,7 @@ set -e
 # Local build script for Nexus OSS
 # Usage: ./build-local.sh [version]
 
-VERSION=${1:-"release-3.89.0-09"}
+VERSION=${1:-"release-3.90.1-01"}
 NEXUS_DIR="nexus-public"
 PROJECT_VERSION=""
 
@@ -103,6 +103,75 @@ clone_or_update() {
         echo "⚠️  Could not determine project version, using placeholder '$PROJECT_VERSION'"
     fi
 
+    echo ""
+}
+
+# Apply source patches required for the CORE (OSS) edition
+patch_source() {
+    echo "🩹 Applying CORE edition source patches..."
+
+    # In Nexus 3.90.1-01 the AssetBlobCleanupTask was refactored to depend on
+    # RecoveryModeService, but no CORE-edition implementation is shipped in the
+    # public source tree. We inject a simple no-op bean so the Spring context
+    # starts up successfully.
+    local target_dir="$NEXUS_DIR/public/common/components/nexus-scheduling/src/main/java/org/sonatype/nexus/scheduling/internal"
+    mkdir -p "$target_dir"
+
+    cat > "$target_dir/RecoveryModeServiceImpl.java" << 'JAVA_EOF'
+/*
+ * Sonatype Nexus (TM) Open Source Version
+ * Copyright (c) 2008-present Sonatype, Inc.
+ * All rights reserved. Includes the third-party code listed at http://links.sonatype.com/products/nexus/oss/attributions.
+ *
+ * This program and the accompanying materials are made available under the terms of the Eclipse Public License Version 1.0,
+ * which accompanies this distribution and is available at http://www.eclipse.org/legal/epl-v10.html.
+ *
+ * Sonatype Nexus (TM) Professional Version is available from Sonatype, Inc. "Sonatype" and "Sonatype Nexus" are trademarks
+ * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
+ * Eclipse Foundation. All other trademarks are the property of their respective owners.
+ */
+package org.sonatype.nexus.scheduling.internal;
+
+import jakarta.inject.Singleton;
+import org.sonatype.nexus.scheduling.RecoveryModeService;
+import org.springframework.stereotype.Component;
+
+/**
+ * No-op {@link RecoveryModeService} for the CORE (OSS) edition.
+ *
+ * Recovery mode is a Professional-edition feature. This stub ensures the Spring
+ * context initialises successfully when no PRO implementation is present.
+ *
+ * @since 3.90
+ */
+@Component
+@Singleton
+public class RecoveryModeServiceImpl
+    implements RecoveryModeService
+{
+  @Override
+  public boolean isRecoveryMode() {
+    return false;
+  }
+
+  @Override
+  public void enableRecoveryMode() {
+    // Not supported in CORE edition
+  }
+
+  @Override
+  public void disableRecoveryMode() {
+    // Not supported in CORE edition
+  }
+
+  @Override
+  public void ensureNotInRecoveryMode(final String taskName) {
+    // Recovery mode is never active in CORE edition
+  }
+}
+JAVA_EOF
+
+    echo "  ✅ RecoveryModeServiceImpl.java patched into nexus-scheduling"
     echo ""
 }
 
@@ -238,6 +307,7 @@ find_artifacts() {
 main() {
     check_requirements
     clone_or_update
+    patch_source
     install_dependencies
     build_frontend
     build_nexus

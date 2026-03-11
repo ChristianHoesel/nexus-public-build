@@ -276,7 +276,7 @@ If you want to build the Docker image yourself:
 
 ```bash
 # Build Nexus first
-./build-local.sh release-3.89.0-09
+./build-local.sh release-3.90.1-01
 
 # Find the built artifact
 TARBALL=$(find nexus-public -name "nexus-*.tar.gz" | head -n 1)
