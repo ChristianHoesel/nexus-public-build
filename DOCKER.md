@@ -122,6 +122,8 @@ environment:
 - `<version>`: Specific Nexus version (e.g., `3.94.0-12`)
 - `<branch>-<sha>`: Branch-specific builds with commit SHA
 
+All tags are published as multi-arch manifests for `linux/amd64` and `linux/arm64`, so `docker pull`/`docker run` picks the right variant automatically on Apple Silicon or ARM servers.
+
 Example:
 ```bash
 docker pull ghcr.io/christianhoesel/nexus-public-build:3.94.0-12
