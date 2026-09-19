@@ -7,7 +7,7 @@ This dev container provides a complete build environment for Sonatype Nexus Repo
 - **Java 25** (OpenJDK via Microsoft Dev Container)
 - **Node.js 20**
 - **Corepack/Yarn 4**
-- **Maven** (via Maven Wrapper in Nexus project)
+- **Maven** (installed in the container)
 - **Git**
 - **GitHub CLI** (`gh`)
 - **Docker-in-Docker** (for Docker image builds)

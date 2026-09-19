@@ -105,7 +105,7 @@ bin/nexus run
 ## Build Requirements
 
 - **Java**: OpenJDK 25 (Temurin recommended)
-- **Node.js**: Version 18 or higher
+- **Node.js**: Version 20 or higher
 - **Corepack**: For Yarn 4 (activate with `corepack enable`)
 - **Yarn**: Version 4.x via Corepack
 - **Maven**: Apache Maven 3.9+ (must be installed separately)
