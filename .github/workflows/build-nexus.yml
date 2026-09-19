@@ -81,6 +81,8 @@ jobs:
 
       - name: Install dependencies with Corepack Yarn
         working-directory: nexus-public
+        env:
+          YARN_ENABLE_IMMUTABLE_INSTALLS: false
         run: |
           # Use upstream's corepack-managed Yarn workflow
           yarn install
