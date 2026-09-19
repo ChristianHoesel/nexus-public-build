@@ -88,7 +88,8 @@ jobs:
       - name: Build Nexus
         working-directory: nexus-public
         run: |
-          # Maven build with "public" profile
+          # Maven build with "public" profile.
+          # CI intentionally lets Maven run its own frontend lifecycle.
           mvn install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp
         env:
           MAVEN_OPTS: "-Xmx4g -XX:+UseG1GC"

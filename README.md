@@ -115,16 +115,15 @@ bin/nexus run
 
 ## Build Process Details
 
-The build uses a Corepack + Maven strategy:
+The repository currently uses two build strategies:
 
-**Phase 1: Dependency install with Yarn 4**
-- Yarn 4.9.1 is activated via Corepack
-- Dependencies are installed with `yarn install`
+**Local script (`build-local.sh`)**
+- Corepack/Yarn install + explicit frontend workspace build
+- Maven build with `-Ppublic -Dskip.installyarn -Dskip.yarn -DskipTests`
 
-**Phase 2: Maven Build**
-- Maven build with `-Ppublic` profile
-- Flags `-Dskip.installyarn -Dskip.yarn` skip redundant Yarn steps after the explicit frontend build
-- `-DskipTests` speeds up the build (tests optional)
+**GitHub Actions workflow**
+- Corepack/Yarn install in CI
+- Maven build with `-Ppublic -DskipTests` (Maven-managed frontend lifecycle)
 
 ## Automatic Builds
 
