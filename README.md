@@ -69,7 +69,7 @@ The build script automatically performs the following steps:
 2. Enables Corepack and prepares Yarn 4
 3. Installs all dependencies with Yarn 4
 4. Builds all frontend components with `yarn workspaces foreach run build-all`
-5. Runs Maven build with `-Ppublic -Dskip.installyarn -Dskip.yarn -DskipTests`
+5. Runs Maven build with `-Ppublic -DskipTests`
 6. Creates `.tar.gz` and `.zip` distributions
 
 The finished artifacts can then be found in the Nexus build tree:
@@ -115,15 +115,16 @@ bin/nexus run
 
 ## Build Process Details
 
-The repository currently uses two build strategies:
+The previous workaround-specific CI build steps were removed.
+The repository now follows the upstream Corepack + Maven build flow.
 
 **Local script (`build-local.sh`)**
 - Corepack/Yarn install + explicit frontend workspace build
-- Maven build with `-Ppublic -Dskip.installyarn -Dskip.yarn -DskipTests`
+- Maven build with `-Ppublic -DskipTests`
 
 **GitHub Actions workflow**
 - Corepack/Yarn install in CI
-- Maven build with `-Ppublic -DskipTests` (Maven-managed frontend lifecycle)
+- Maven build with `-Ppublic -DskipTests`
 
 ## Automatic Builds
 
