@@ -4,7 +4,7 @@ set -e
 # Local build script for Nexus OSS
 # Usage: ./build-local.sh [version]
 
-VERSION=${1:-"release-3.94.0-12"}
+VERSION=${1:-"release-3.96.2-01"}
 NEXUS_DIR="nexus-public"
 PROJECT_VERSION=""
 
@@ -22,7 +22,7 @@ check_requirements() {
     
     # Check Java version
     if ! command -v java &> /dev/null; then
-        echo "❌ Java not found. Please install Java 21."
+        echo "❌ Java not found. Please install Java 25."
         exit 1
     fi
     
@@ -33,8 +33,8 @@ check_requirements() {
     fi
     
     JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d'.' -f1)
-    if [ "$JAVA_VERSION" != "21" ] && [ "$JAVA_VERSION" != "25" ]; then
-        echo "⚠️  Warning: Java $JAVA_VERSION found, but Java 21 or 25 is recommended."
+    if [ "$JAVA_VERSION" != "25" ]; then
+        echo "⚠️  Warning: Java $JAVA_VERSION found, but Java 25 is recommended."
         read -p "Continue anyway? (y/n) " -n 1 -r
         echo
         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
@@ -151,7 +151,7 @@ build_nexus() {
     export MAVEN_OPTS="-Xmx4g -XX:+UseG1GC"
     
     echo "Running fast build without tests..."
-    mvn install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp -Dskip.installyarn -Dskip.yarn
+    mvn install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp
     
     echo ""
     cd ..

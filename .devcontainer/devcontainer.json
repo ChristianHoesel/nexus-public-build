@@ -1,10 +1,10 @@
 {
   "name": "Nexus Public Build Environment",
-  "image": "mcr.microsoft.com/devcontainers/java:21",
+  "image": "mcr.microsoft.com/devcontainers/java:25",
   
   "features": {
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "18"
+      "version": "20"
     },
     "ghcr.io/devcontainers/features/git:1": {
       "version": "latest"
@@ -29,7 +29,7 @@
       "settings": {
         "java.configuration.runtimes": [
           {
-            "name": "JavaSE-21",
+            "name": "JavaSE-25",
             "path": "/usr/local/sdkman/candidates/java/current",
             "default": true
           }
