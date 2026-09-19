@@ -151,7 +151,7 @@ build_nexus() {
     export MAVEN_OPTS="-Xmx4g -XX:+UseG1GC"
     
     echo "Running fast build without tests..."
-    mvn install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp
+    mvn install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp -Dskip.installyarn -Dskip.yarn
     
     echo ""
     cd ..

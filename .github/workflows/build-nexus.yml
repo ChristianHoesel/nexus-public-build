@@ -83,7 +83,7 @@ jobs:
         working-directory: nexus-public
         run: |
           # Use upstream's corepack-managed Yarn workflow
-          corepack yarn install
+          yarn install
 
       - name: Build Nexus
         working-directory: nexus-public
