@@ -37,14 +37,13 @@ On first start of the container:
 # Build specific version
 ./build-local.sh release-3.96.2-01
 
-# Or manually (alternative local-only flow; CI uses Maven frontend lifecycle)
+# Or manually (CI-aligned flow)
 cd nexus-public
 corepack enable
 corepack prepare yarn@4.9.1 --activate
 export YARN_NODE_LINKER=node-modules
 yarn install
-yarn workspaces foreach --all --topological-dev run build-all
-mvn clean install -Ppublic -DskipTests -Dskip.installyarn -Dskip.yarn
+mvn clean install -Ppublic -DskipTests
 ```
 
 ### Testing GitHub Actions locally
