@@ -39,7 +39,12 @@ On first start of the container:
 
 # Or manually
 cd nexus-public
-mvn clean install -Ppublic -DskipTests
+corepack enable
+corepack prepare yarn@4.9.1 --activate
+yarn config set nodeLinker node-modules
+yarn install
+yarn workspaces foreach --all --topological-dev run build-all
+mvn clean install -Ppublic -DskipTests -Dskip.installyarn -Dskip.yarn
 ```
 
 ### Testing GitHub Actions locally
