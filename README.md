@@ -8,7 +8,7 @@ The official Nexus Public Repository has some challenges:
 - A separate branch is created for each version (e.g., `release-3.86.0-08`)
 - The `main` branch is only sporadically updated (last update: February 2025)
 - Releases are maintained as separate branches and tags, not as continuous development in the main branch
-- The build requires a specific setup (Java 25, Corepack/Yarn & Maven profile "public")
+- The build requires a specific setup (Java 21/25, Corepack/Yarn & Maven profile "public")
 - Build documentation is incomplete and requires knowledge of Maven profiles
 
 ## Solution
@@ -116,7 +116,7 @@ bin/nexus run
 
 ## Build Process Details
 
-Current build flow uses Corepack-managed Yarn with `nodeLinker=node-modules` in CI to avoid PnP/Corepack runtime resolution failures during Maven-triggered frontend tasks.
+Current build flow uses Corepack-managed Yarn with `nodeLinker=node-modules` in both CI and the local script to avoid PnP/Corepack runtime resolution failures during frontend tasks.
 
 **Local script (`build-local.sh`)**
 - Corepack/Yarn install with `nodeLinker=node-modules` + explicit frontend workspace build
