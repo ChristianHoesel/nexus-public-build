@@ -83,9 +83,8 @@ jobs:
         working-directory: nexus-public
         env:
           YARN_ENABLE_IMMUTABLE_INSTALLS: false
+          YARN_NODE_LINKER: node-modules
         run: |
-          # Avoid PnP runtime resolution issues during Maven-triggered frontend builds.
-          yarn config set nodeLinker node-modules
           # Use upstream's corepack-managed Yarn workflow
           yarn install
 
@@ -97,6 +96,7 @@ jobs:
           mvn install -Ppublic -DskipTests -Dmaven.javadoc.skip=true -ntp
         env:
           MAVEN_OPTS: "-Xmx4g -XX:+UseG1GC"
+          YARN_NODE_LINKER: node-modules
 
       - name: Package Distribution
         working-directory: nexus-public

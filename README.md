@@ -115,15 +115,15 @@ bin/nexus run
 
 ## Build Process Details
 
-The previous workaround-specific CI build steps were removed.
-The repository now follows the upstream Corepack + Maven build flow.
+The previous source-code patch workarounds were removed.
+CI still applies Yarn linker settings (`YARN_NODE_LINKER=node-modules`) to avoid PnP/Corepack runtime resolution failures during Maven-triggered frontend tasks.
 
 **Local script (`build-local.sh`)**
 - Corepack/Yarn install + explicit frontend workspace build
 - Maven build with `-Ppublic -DskipTests`
 
 **GitHub Actions workflow**
-- Corepack/Yarn install in CI
+- Corepack/Yarn install in CI with `YARN_NODE_LINKER=node-modules`
 - Maven build with `-Ppublic -DskipTests`
 
 ## Automatic Builds
