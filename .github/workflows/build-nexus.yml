@@ -84,6 +84,8 @@ jobs:
         env:
           YARN_ENABLE_IMMUTABLE_INSTALLS: false
         run: |
+          # Avoid PnP runtime resolution issues during Maven-triggered frontend builds.
+          yarn config set nodeLinker node-modules
           # Use upstream's corepack-managed Yarn workflow
           yarn install
 
