@@ -118,15 +118,18 @@ environment:
 
 ## Available Tags
 
-- `latest`: Latest build from the main branch
-- `<version>`: Specific Nexus version (e.g., `3.96.2-01`)
-- `<branch>-<sha>`: Branch-specific builds with commit SHA
-
-All tags are published as multi-arch manifests for `linux/amd64` and `linux/arm64`, so `docker pull`/`docker run` picks the right variant automatically on Apple Silicon or ARM servers.
+- `latest`: Latest build from the main branch (`linux/x86` default)
+- `<version>`: Specific Nexus version (e.g., `3.96.2-01`, `linux/x86` default)
+- `<branch>-<sha>`: Branch-specific builds with commit SHA (`linux/x86` default)
+- `latest-linux-x86`, `<version>-linux-x86`, `<branch>-<sha>-linux-x86`: Explicit Linux x86 (`linux/amd64`) tags
+- `latest-linux-arm64`, `<version>-linux-arm64`, `<branch>-<sha>-linux-arm64`: Explicit Linux ARM64 tags
 
 Example:
 ```bash
 docker pull ghcr.io/christianhoesel/nexus-public-build:3.96.2-01
+
+# ARM64 explicitly
+docker pull ghcr.io/christianhoesel/nexus-public-build:3.96.2-01-linux-arm64
 ```
 
 ## Health Check
