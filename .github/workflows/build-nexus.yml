@@ -500,8 +500,8 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             NEXUS_VERSION=${{ steps.version.outputs.version }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=${{ matrix.tag_suffix }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.tag_suffix }}
 
       - name: Image digest
         run: echo "Docker image pushed successfully with tags ${{ steps.platform_tags.outputs.tags }}"
