@@ -4,10 +4,10 @@ This dev container provides a complete build environment for Sonatype Nexus Repo
 
 ## Included Tools
 
-- **Java 21** (OpenJDK via Microsoft Dev Container)
-- **Node.js 18**
-- **Yarn 1.22.22** (installed globally)
-- **Maven** (via Maven Wrapper in Nexus project)
+- **Java 25** (OpenJDK via Microsoft Dev Container)
+- **Node.js 20**
+- **Corepack/Yarn 4**
+- **Maven** (installed in the container)
 - **Git**
 - **GitHub CLI** (`gh`)
 - **Docker-in-Docker** (for Docker image builds)
@@ -15,7 +15,7 @@ This dev container provides a complete build environment for Sonatype Nexus Repo
 ## Automatic Configuration
 
 On first start of the container:
-- Yarn 1.22.22 is installed
+- Corepack is enabled
 - The build script is made executable
 - Maven and Yarn caches are mounted as volumes (for faster builds)
 - Port 8081 is forwarded for Nexus
@@ -35,11 +35,15 @@ On first start of the container:
 ./build-local.sh
 
 # Build specific version
-./build-local.sh release-3.92.3-01
+./build-local.sh release-3.96.2-01
 
-# Or manually
+# Or manually (CI-aligned flow)
 cd nexus-public
-mvn clean install -Ppublic -DskipTests
+corepack enable
+corepack prepare yarn@4.9.1 --activate
+export YARN_NODE_LINKER=node-modules
+yarn install
+YARN_NODE_LINKER=node-modules mvn clean install -Ppublic -DskipTests
 ```
 
 ### Testing GitHub Actions locally
@@ -88,9 +92,9 @@ Automatically installed extensions:
 
 ## Troubleshooting
 
-### Yarn Version Error
+### Yarn/Corepack Error
 
-If you see an error like "packageManager: yarn@4.9.1":
+If you see an error related to the `packageManager` Yarn version:
 
 ```bash
 corepack enable

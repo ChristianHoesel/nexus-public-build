@@ -8,7 +8,7 @@ The official Nexus Public Repository has some challenges:
 - A separate branch is created for each version (e.g., `release-3.86.0-08`)
 - The `main` branch is only sporadically updated (last update: February 2025)
 - Releases are maintained as separate branches and tags, not as continuous development in the main branch
-- The build requires a specific setup (Java 21, Yarn 1.22 & Maven profile "public")
+- The build requires a specific setup (Java 21/25, Corepack/Yarn & Maven profile "public")
 - Build documentation is incomplete and requires knowledge of Maven profiles
 
 ## Solution
@@ -37,7 +37,7 @@ For detailed Docker usage, configuration, and troubleshooting, see [DOCKER.md](D
 1. Go to the "Actions" tab in this repository
 2. Select the workflow "Build Nexus OSS"
 3. Click on "Run workflow"
-4. Enter the desired Nexus version (e.g., `release-3.94.0-12`)
+4. Enter the desired Nexus version (e.g., `release-3.96.2-01`)
 5. Built artifacts can be found under "Artifacts" after the build completes
 
 ### Available Versions
@@ -46,10 +46,10 @@ Find Nexus versions here:
 - **Branches**: https://github.com/sonatype/nexus-public/branches/all
 - **Releases/Tags**: https://github.com/sonatype/nexus-public/releases
 
-Current examples (as of July 2026):
-- `release-3.94.0-12` (latest)
-- `release-3.93.0-06`
-- `release-3.89.0-09`  
+Current examples (as of September 2026):
+- `release-3.96.2-01` (latest)
+- `release-3.95.4-01`
+- `release-3.94.2-01`  
 
 
 **Note**: Branch names correspond to release tags. Use the branch name for the build.
@@ -61,17 +61,16 @@ If you want to build locally:
 ```bash
 # Simply use the build script
 chmod +x build-local.sh
-./build-local.sh release-3.94.0-12
+./build-local.sh release-3.96.2-01
 ```
 
 The build script automatically performs the following steps:
 1. Clones the Nexus Public Repository
-2. Enables Corepack and configures Yarn 4 with `nodeLinker: node-modules`
+2. Enables Corepack and prepares Yarn 4
 3. Installs all dependencies with Yarn 4
 4. Builds all frontend components with `yarn workspaces foreach run build-all`
-5. Switches to Yarn 1.22.22 for Maven compatibility
-6. Runs Maven build with `-Ppublic -Dskip.installyarn -Dskip.yarn -DskipTests`
-7. Creates `.tar.gz` and `.zip` distributions
+5. Runs Maven build with `-Ppublic -DskipTests`
+6. Creates `.tar.gz` and `.zip` distributions
 
 The finished artifacts can then be found in the Nexus build tree:
 - `nexus-*-unix.tar.gz` (~133 MB)
@@ -106,29 +105,25 @@ bin/nexus run
 
 ## Build Requirements
 
-- **Java**: OpenJDK 21 or 25 (Temurin recommended)
-- **Node.js**: Version 18 or higher
+- **Java**: OpenJDK 21 or 25 (Temurin recommended; CI/devcontainer uses 25)
+- **Node.js**: Version 20 or higher
 - **Corepack**: For Yarn 4 (activate with `corepack enable`)
-- **Yarn**: Version 4.9.1 for frontend build, version 1.22.22 for Maven (automatically managed by build script)
+- **Yarn**: Version 4.x via Corepack
+- **Local build script behavior**: runs a Yarn workspace frontend prebuild (`build-all`) with `nodeLinker=node-modules` before Maven
 - **Maven**: Apache Maven 3.9+ (must be installed separately)
 - **RAM**: At least 4 GB for the build process
 - **Disk**: ~2 GB for dependencies and build artifacts
 
 ## Build Process Details
 
-The build uses a two-phase strategy:
+Current CI build flow uses Corepack-managed Yarn with `nodeLinker=node-modules` to avoid PnP/Corepack runtime resolution failures during frontend tasks.
 
-**Phase 1: Frontend Build with Yarn 4**
-- Yarn 4.9.1 is activated via Corepack
-- `nodeLinker: node-modules` for rspack compatibility
-- Dependencies are installed with `yarn install --no-immutable`
-- Frontend components are built with `yarn workspaces foreach run build-all`
+**Local script (`build-local.sh`)**
+- Use `./build-local.sh` for local builds (it manages local frontend and Maven steps)
 
-**Phase 2: Maven Build with Yarn 1**
-- Switch to Yarn 1.22.22 (via `npm install -g yarn@1.22.22`)
-- Maven build with `-Ppublic` profile
-- Flags `-Dskip.installyarn -Dskip.yarn` skip redundant Yarn steps
-- `-DskipTests` speeds up the build (tests optional)
+**GitHub Actions workflow**
+- Corepack/Yarn install in CI with `YARN_NODE_LINKER=node-modules`
+- Maven build with `-Ppublic -DskipTests`, also under `YARN_NODE_LINKER=node-modules` while Maven runs the frontend lifecycle
 
 ## Automatic Builds
 
@@ -154,7 +149,7 @@ Docker images are automatically built and published to the GitHub Container Regi
 - **Registry**: `ghcr.io/christianhoesel/nexus-public-build`
 - **Tags**: 
   - `latest` - Latest build from main branch
-  - `<version>` - Specific Nexus version (e.g., `3.94.0-12`)
+  - `<version>` - Specific Nexus version (e.g., `3.96.2-01`)
   - `<branch>-<sha>` - Branch-specific builds
 
 ```bash

@@ -4,7 +4,7 @@ set -e
 # Local build script for Nexus OSS
 # Usage: ./build-local.sh [version]
 
-VERSION=${1:-"release-3.94.0-12"}
+VERSION=${1:-"release-3.96.2-01"}
 NEXUS_DIR="nexus-public"
 PROJECT_VERSION=""
 
@@ -22,7 +22,7 @@ check_requirements() {
     
     # Check Java version
     if ! command -v java &> /dev/null; then
-        echo "❌ Java not found. Please install Java 21."
+        echo "❌ Java not found. Please install Java 21 or Java 25."
         exit 1
     fi
     

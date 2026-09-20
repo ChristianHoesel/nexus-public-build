@@ -119,14 +119,14 @@ environment:
 ## Available Tags
 
 - `latest`: Latest build from the main branch
-- `<version>`: Specific Nexus version (e.g., `3.94.0-12`)
+- `<version>`: Specific Nexus version (e.g., `3.96.2-01`)
 - `<branch>-<sha>`: Branch-specific builds with commit SHA
 
 All tags are published as multi-arch manifests for `linux/amd64` and `linux/arm64`, so `docker pull`/`docker run` picks the right variant automatically on Apple Silicon or ARM servers.
 
 Example:
 ```bash
-docker pull ghcr.io/christianhoesel/nexus-public-build:3.94.0-12
+docker pull ghcr.io/christianhoesel/nexus-public-build:3.96.2-01
 ```
 
 ## Health Check
@@ -278,7 +278,7 @@ If you want to build the Docker image yourself:
 
 ```bash
 # Build Nexus first
-./build-local.sh release-3.94.0-12
+./build-local.sh release-3.96.2-01
 
 # Find the built artifact
 TARBALL=$(find nexus-public -name "nexus-*.tar.gz" | head -n 1)
