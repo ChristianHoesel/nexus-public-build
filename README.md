@@ -109,6 +109,7 @@ bin/nexus run
 - **Node.js**: Version 20 or higher
 - **Corepack**: For Yarn 4 (activate with `corepack enable`)
 - **Yarn**: Version 4.x via Corepack
+- **Local build script behavior**: runs a Yarn workspace frontend prebuild (`build-all`) with `nodeLinker=node-modules` before Maven
 - **Maven**: Apache Maven 3.9+ (must be installed separately)
 - **RAM**: At least 4 GB for the build process
 - **Disk**: ~2 GB for dependencies and build artifacts
