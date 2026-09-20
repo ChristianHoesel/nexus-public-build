@@ -41,7 +41,7 @@ On first start of the container:
 cd nexus-public
 corepack enable
 corepack prepare yarn@4.9.1 --activate
-yarn config set nodeLinker node-modules
+export YARN_NODE_LINKER=node-modules
 yarn install
 yarn workspaces foreach --all --topological-dev run build-all
 mvn clean install -Ppublic -DskipTests -Dskip.installyarn -Dskip.yarn
