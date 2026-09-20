@@ -400,7 +400,7 @@ jobs:
       matrix:
         include:
           - platform: linux/amd64
-            tag_suffix: linux-x86
+            tag_suffix: linux-amd64
             default_tag: true
           - platform: linux/arm64
             tag_suffix: linux-arm64
@@ -503,4 +503,4 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Image digest
-        run: echo "Docker image pushed successfully with tags ${{ steps.meta.outputs.tags }}"
+        run: echo "Docker image pushed successfully with tags ${{ steps.platform_tags.outputs.tags }}"
