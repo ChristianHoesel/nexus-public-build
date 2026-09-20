@@ -105,7 +105,7 @@ bin/nexus run
 
 ## Build Requirements
 
-- **Java**: OpenJDK 25 (Temurin recommended)
+- **Java**: OpenJDK 21 or 25 (Temurin recommended; CI/devcontainer uses 25)
 - **Node.js**: Version 20 or higher
 - **Corepack**: For Yarn 4 (activate with `corepack enable`)
 - **Yarn**: Version 4.x via Corepack
@@ -116,8 +116,7 @@ bin/nexus run
 
 ## Build Process Details
 
-The previous source-code patch workarounds were removed.
-CI still applies Yarn linker settings (`YARN_NODE_LINKER=node-modules`) to avoid PnP/Corepack runtime resolution failures during Maven-triggered frontend tasks.
+Current build flow uses Corepack-managed Yarn with `nodeLinker=node-modules` in CI to avoid PnP/Corepack runtime resolution failures during Maven-triggered frontend tasks.
 
 **Local script (`build-local.sh`)**
 - Corepack/Yarn install with `nodeLinker=node-modules` + explicit frontend workspace build
