@@ -124,7 +124,7 @@ Current build flow uses Corepack-managed Yarn with `nodeLinker=node-modules` in 
 
 **GitHub Actions workflow**
 - Corepack/Yarn install in CI with `YARN_NODE_LINKER=node-modules`
-- Maven build with `-Ppublic -DskipTests`
+- Maven build with `-Ppublic -DskipTests`, also under `YARN_NODE_LINKER=node-modules` while Maven runs the frontend lifecycle
 
 ## Automatic Builds
 
