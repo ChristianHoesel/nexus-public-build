@@ -399,6 +399,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Unsuffixed tags are intentionally published as linux/amd64 only.
           - platform: linux/amd64
             tag_suffix: linux-amd64
             default_tag: true

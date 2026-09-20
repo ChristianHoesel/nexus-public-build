@@ -118,9 +118,9 @@ environment:
 
 ## Available Tags
 
-- `latest`: Latest build from the main branch (`linux/amd64` default, x86_64)
-- `<version>`: Specific Nexus version (e.g., `3.96.2-01`, `linux/amd64` default)
-- `<branch>-<sha>`: Branch-specific builds with commit SHA (`linux/amd64` default)
+- `latest`: Latest build from the main branch (`linux/amd64` only, x86_64)
+- `<version>`: Specific Nexus version (e.g., `3.96.2-01`, `linux/amd64` only)
+- `<branch>-<sha>`: Branch-specific builds with commit SHA (`linux/amd64` only)
 - `latest-linux-amd64`, `<version>-linux-amd64`, `<branch>-<sha>-linux-amd64`: Explicit Linux AMD64 tags
 - `latest-linux-arm64`, `<version>-linux-arm64`, `<branch>-<sha>-linux-arm64`: Explicit Linux ARM64 tags
 

@@ -148,9 +148,9 @@ Artifacts are kept for 30 days.
 Docker images are automatically built and published to the GitHub Container Registry:
 - **Registry**: `ghcr.io/christianhoesel/nexus-public-build`
 - **Tags**: 
-  - `latest` - Latest build from main branch (`linux/amd64` default, x86_64)
-  - `<version>` - Specific Nexus version (e.g., `3.96.2-01`, `linux/amd64` default)
-  - `<branch>-<sha>` - Branch-specific builds (`linux/amd64` default)
+  - `latest` - Latest build from main branch (`linux/amd64` only, x86_64)
+  - `<version>` - Specific Nexus version (e.g., `3.96.2-01`, `linux/amd64` only)
+  - `<branch>-<sha>` - Branch-specific builds (`linux/amd64` only)
   - `*-linux-amd64` / `*-linux-arm64` - Explicit platform tags
 
 ```bash
