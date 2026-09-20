@@ -43,7 +43,7 @@ corepack enable
 corepack prepare yarn@4.9.1 --activate
 export YARN_NODE_LINKER=node-modules
 yarn install
-mvn clean install -Ppublic -DskipTests
+YARN_NODE_LINKER=node-modules mvn clean install -Ppublic -DskipTests
 ```
 
 ### Testing GitHub Actions locally
