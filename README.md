@@ -119,8 +119,7 @@ bin/nexus run
 Current build flow uses Corepack-managed Yarn with `nodeLinker=node-modules` in both CI and the local script to avoid PnP/Corepack runtime resolution failures during frontend tasks.
 
 **Local script (`build-local.sh`)**
-- Corepack/Yarn install with `nodeLinker=node-modules` + explicit frontend workspace build
-- Maven build with `-Ppublic -DskipTests -Dskip.installyarn -Dskip.yarn` (frontend lifecycle handled in the prebuild step)
+- Uses a local-only workflow: frontend prebuild with Yarn (`nodeLinker=node-modules`) followed by Maven packaging
 
 **GitHub Actions workflow**
 - Corepack/Yarn install in CI with `YARN_NODE_LINKER=node-modules`

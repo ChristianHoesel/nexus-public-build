@@ -37,7 +37,7 @@ On first start of the container:
 # Build specific version
 ./build-local.sh release-3.96.2-01
 
-# Or manually
+# Or manually (alternative local-only flow; CI uses Maven frontend lifecycle)
 cd nexus-public
 corepack enable
 corepack prepare yarn@4.9.1 --activate
