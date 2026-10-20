@@ -35,7 +35,7 @@ On first start of the container:
 ./build-local.sh
 
 # Build specific version
-./build-local.sh release-3.96.2-01
+./build-local.sh release-3.97.0-13
 
 # Or manually (CI-aligned flow)
 cd nexus-public
