@@ -46,7 +46,7 @@ Find Nexus versions here:
 - **Branches**: https://github.com/sonatype/nexus-public/branches/all
 - **Releases/Tags**: https://github.com/sonatype/nexus-public/releases
 
-Current examples (as of September 2026):
+Current examples (as of October 2026):
 - `release-3.97.0-13` (latest)
 - `release-3.96.2-01`
 - `release-3.95.4-01`
